@@ -95,7 +95,7 @@ public partial class @AM_02Tank: IInputActionCollection2, IDisposable
                     ""name"": ""Accelerate"",
                     ""type"": ""Button"",
                     ""id"": ""33f16d51-dff8-436a-a28d-69ea024d2efe"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
