@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fa5a7e4a1f6fdf479a5558abe889437, type: 3}
+  m_Name: TankConfigBasic
+  m_EditorClassIdentifier: 
+  maxTrackForce: 2500
+  maxSpeed: 12
+  restLength: 0.6
+  springStiffnes: 350000
+  damperStrength: 4500
+  maxCompression: 0.3

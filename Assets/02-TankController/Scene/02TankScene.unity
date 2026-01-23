@@ -128,6 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 55085257}
+  - component: {fileID: 55085258}
   m_Layer: 0
   m_Name: TrackL
   m_TagString: Untagged
@@ -155,6 +156,18 @@ Transform:
   - {fileID: 1903849211}
   m_Father: {fileID: 928874463}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &55085258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 55085256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef7814a139b16234784615a773c8cd3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &115009021
 GameObject:
   m_ObjectHideFlags: 0
@@ -890,6 +903,7 @@ GameObject:
   - component: {fileID: 388173715}
   - component: {fileID: 388173717}
   - component: {fileID: 388173716}
+  - component: {fileID: 388173718}
   m_Layer: 0
   m_Name: Wheel
   m_TagString: Untagged
@@ -965,6 +979,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388173714}
   m_Mesh: {fileID: 4300002, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
+--- !u!114 &388173718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388173714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &394274512
 GameObject:
   m_ObjectHideFlags: 0
@@ -1098,6 +1124,7 @@ GameObject:
   - component: {fileID: 604312206}
   - component: {fileID: 604312208}
   - component: {fileID: 604312207}
+  - component: {fileID: 604312209}
   m_Layer: 0
   m_Name: Wheel
   m_TagString: Untagged
@@ -1173,6 +1200,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 604312205}
   m_Mesh: {fileID: 4300002, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
+--- !u!114 &604312209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604312205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &616172344
 GameObject:
   m_ObjectHideFlags: 0
@@ -1268,6 +1307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 693492377}
+  - component: {fileID: 693492378}
   m_Layer: 0
   m_Name: SuspensionArm3
   m_TagString: Untagged
@@ -1291,6 +1331,27 @@ Transform:
   - {fileID: 1017359242}
   m_Father: {fileID: 55085257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &693492378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 693492376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 0
+  m_SurfaceNormal: {x: 0, y: 0, z: 0}
+  m_HitPoint: {x: 0, y: 0, z: 0}
+  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_WheelPos: {fileID: 1017359242}
+  m_RestLength: 0
+  m_SpringStiffness: 0
+  m_DamperStrength: 0
+  m_MaxCompression: 0
 --- !u!1 &795188233
 GameObject:
   m_ObjectHideFlags: 0
@@ -2140,6 +2201,7 @@ GameObject:
   - component: {fileID: 928874463}
   - component: {fileID: 928874461}
   - component: {fileID: 928874466}
+  - component: {fileID: 928874467}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Untagged
@@ -2205,6 +2267,20 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &928874467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 928874459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b428d1d37d6a4424a81e83c77ed6f6a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LeftTrack: []
+  RightTrack: []
 --- !u!1 &934198954
 GameObject:
   m_ObjectHideFlags: 0
@@ -2513,6 +2589,7 @@ GameObject:
   - component: {fileID: 1017359242}
   - component: {fileID: 1017359244}
   - component: {fileID: 1017359243}
+  - component: {fileID: 1017359245}
   m_Layer: 2
   m_Name: Wheel
   m_TagString: Untagged
@@ -2588,6 +2665,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1017359241}
   m_Mesh: {fileID: 4300006, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
+--- !u!114 &1017359245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017359241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1032749531
 GameObject:
   m_ObjectHideFlags: 0
@@ -2600,6 +2689,7 @@ GameObject:
   - component: {fileID: 1032749534}
   - component: {fileID: 1032749533}
   - component: {fileID: 1032749532}
+  - component: {fileID: 1032749536}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -2696,6 +2786,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1032749536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1032749531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef7814a139b16234784615a773c8cd3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1087929408
 GameObject:
   m_ObjectHideFlags: 0
@@ -2705,6 +2807,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1087929409}
+  - component: {fileID: 1087929410}
   m_Layer: 0
   m_Name: SuspensionArm3
   m_TagString: Untagged
@@ -2728,6 +2831,27 @@ Transform:
   - {fileID: 388173715}
   m_Father: {fileID: 1937698541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1087929410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087929408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 0
+  m_SurfaceNormal: {x: 0, y: 0, z: 0}
+  m_HitPoint: {x: 0, y: 0, z: 0}
+  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_WheelPos: {fileID: 388173715}
+  m_RestLength: 0
+  m_SpringStiffness: 0
+  m_DamperStrength: 0
+  m_MaxCompression: 0
 --- !u!1 &1124852847
 GameObject:
   m_ObjectHideFlags: 0
@@ -3061,6 +3185,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1208321946}
+  - component: {fileID: 1208321947}
   m_Layer: 0
   m_Name: SuspensionArm1
   m_TagString: Untagged
@@ -3084,6 +3209,27 @@ Transform:
   - {fileID: 1325602300}
   m_Father: {fileID: 55085257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1208321947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208321945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 0
+  m_SurfaceNormal: {x: 0, y: 0, z: 0}
+  m_HitPoint: {x: 0, y: 0, z: 0}
+  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_WheelPos: {fileID: 1325602300}
+  m_RestLength: 0
+  m_SpringStiffness: 0
+  m_DamperStrength: 0
+  m_MaxCompression: 0
 --- !u!1 &1235931972
 GameObject:
   m_ObjectHideFlags: 0
@@ -3205,6 +3351,7 @@ GameObject:
   - component: {fileID: 1282588305}
   - component: {fileID: 1282588307}
   - component: {fileID: 1282588306}
+  - component: {fileID: 1282588308}
   m_Layer: 2
   m_Name: Wheel
   m_TagString: Untagged
@@ -3280,6 +3427,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1282588304}
   m_Mesh: {fileID: 4300006, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
+--- !u!114 &1282588308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282588304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1325602299
 GameObject:
   m_ObjectHideFlags: 0
@@ -3291,6 +3450,7 @@ GameObject:
   - component: {fileID: 1325602300}
   - component: {fileID: 1325602302}
   - component: {fileID: 1325602301}
+  - component: {fileID: 1325602303}
   m_Layer: 2
   m_Name: Wheel
   m_TagString: Untagged
@@ -3366,6 +3526,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1325602299}
   m_Mesh: {fileID: 4300006, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
+--- !u!114 &1325602303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1325602299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1566191697
 GameObject:
   m_ObjectHideFlags: 0
@@ -3375,6 +3547,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1566191698}
+  - component: {fileID: 1566191699}
   m_Layer: 0
   m_Name: DriveWheel
   m_TagString: Untagged
@@ -3398,6 +3571,18 @@ Transform:
   - {fileID: 394274513}
   m_Father: {fileID: 55085257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1566191699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1566191697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c89faf9ea596d1d459c9cbb85629ee88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1602318924
 GameObject:
   m_ObjectHideFlags: 0
@@ -3578,6 +3763,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1689150373}
+  - component: {fileID: 1689150374}
   m_Layer: 0
   m_Name: SuspensionArm2
   m_TagString: Untagged
@@ -3601,6 +3787,27 @@ Transform:
   - {fileID: 604312206}
   m_Father: {fileID: 1937698541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1689150374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689150372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 0
+  m_SurfaceNormal: {x: 0, y: 0, z: 0}
+  m_HitPoint: {x: 0, y: 0, z: 0}
+  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_WheelPos: {fileID: 604312206}
+  m_RestLength: 0
+  m_SpringStiffness: 0
+  m_DamperStrength: 0
+  m_MaxCompression: 0
 --- !u!1 &1692009104
 GameObject:
   m_ObjectHideFlags: 0
@@ -3610,6 +3817,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1692009105}
+  - component: {fileID: 1692009106}
   m_Layer: 0
   m_Name: DriveWheel
   m_TagString: Untagged
@@ -3633,6 +3841,18 @@ Transform:
   - {fileID: 795188234}
   m_Father: {fileID: 1937698541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1692009106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692009104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c89faf9ea596d1d459c9cbb85629ee88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1726981053
 GameObject:
   m_ObjectHideFlags: 0
@@ -3750,6 +3970,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1749546096}
+  - component: {fileID: 1749546097}
   m_Layer: 0
   m_Name: SuspensionArm1
   m_TagString: Untagged
@@ -3773,6 +3994,27 @@ Transform:
   - {fileID: 1803464509}
   m_Father: {fileID: 1937698541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1749546097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749546095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 0
+  m_SurfaceNormal: {x: 0, y: 0, z: 0}
+  m_HitPoint: {x: 0, y: 0, z: 0}
+  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_WheelPos: {fileID: 1803464509}
+  m_RestLength: 0
+  m_SpringStiffness: 0
+  m_DamperStrength: 0
+  m_MaxCompression: 0
 --- !u!1 &1803464508
 GameObject:
   m_ObjectHideFlags: 0
@@ -3784,6 +4026,7 @@ GameObject:
   - component: {fileID: 1803464509}
   - component: {fileID: 1803464511}
   - component: {fileID: 1803464510}
+  - component: {fileID: 1803464512}
   m_Layer: 0
   m_Name: Wheel
   m_TagString: Untagged
@@ -3859,6 +4102,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1803464508}
   m_Mesh: {fileID: 4300002, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
+--- !u!114 &1803464512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1803464508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1851593818
 GameObject:
   m_ObjectHideFlags: 0
@@ -3868,6 +4123,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1851593819}
+  - component: {fileID: 1851593820}
   m_Layer: 0
   m_Name: SuspensionArm2
   m_TagString: Untagged
@@ -3891,6 +4147,27 @@ Transform:
   - {fileID: 1282588305}
   m_Father: {fileID: 55085257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1851593820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851593818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 0
+  m_SurfaceNormal: {x: 0, y: 0, z: 0}
+  m_HitPoint: {x: 0, y: 0, z: 0}
+  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_WheelPos: {fileID: 1282588305}
+  m_RestLength: 0
+  m_SpringStiffness: 0
+  m_DamperStrength: 0
+  m_MaxCompression: 0
 --- !u!1 &1896376904
 GameObject:
   m_ObjectHideFlags: 0
@@ -4126,6 +4403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1937698541}
+  - component: {fileID: 1937698542}
   m_Layer: 0
   m_Name: TrackR
   m_TagString: Untagged
@@ -4153,6 +4431,18 @@ Transform:
   - {fileID: 299509304}
   m_Father: {fileID: 928874463}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1937698542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937698540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef7814a139b16234784615a773c8cd3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2080278627
 GameObject:
   m_ObjectHideFlags: 0
