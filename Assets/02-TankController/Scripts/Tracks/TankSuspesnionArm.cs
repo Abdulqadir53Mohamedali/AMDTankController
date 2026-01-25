@@ -25,6 +25,11 @@ public class TankSuspesnionArm : MonoBehaviour
     [SerializeField] private float m_DamperStrength;
     [SerializeField] private float m_MaxCompression;
 
+    [Header("Base Spring Values")]
+    [SerializeField] private LayerMask m_IgnoreLayers; 
+    private int m_RaycastMask;
+
+
     private Rigidbody m_Rigidbody;
 
     //public static event Action<float,Vector3,Vector3> onSuspensionRaycast;
@@ -42,7 +47,9 @@ public class TankSuspesnionArm : MonoBehaviour
         m_MaxCompression = m_TankConfig.maxCompression;
 
         m_Rigidbody = GetComponentInParent<Rigidbody>();
-        
+
+        m_RaycastMask = ~m_IgnoreLayers.value; // invert so raycast hits everything EXCEPT ignored layers
+
     }
     // Update is called once per frame
     void Update()
@@ -54,14 +61,18 @@ public class TankSuspesnionArm : MonoBehaviour
     {
         SpringCheck();
         TotalForce();
+
     }
     public void SpringCheck()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2f))
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.5f, m_RaycastMask, QueryTriggerInteraction.Ignore))
         {
             m_Distance = hit.distance;
             m_SurfaceNormal = hit.normal;
             m_HitPoint = hit.point;
+
+            Debug.DrawLine(transform.position, hit.point, Color.green); // hit point in green
+
         }
 
     }

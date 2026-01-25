@@ -5,13 +5,23 @@ using UnityEngine.InputSystem;
 public class TankController : MonoBehaviour
 {
 	private AM_02Tank m_ActionMap; //input
+	private TankMovement m_Movement;
 
-	private void Awake()
+
+    private float throttle = 0f;
+    private float steer = 0f;
+    private void Awake()
 	{
 		m_ActionMap = new AM_02Tank();
+		m_Movement = GetComponent<TankMovement>();
 	}
+    void Update()
+    {
+        m_Movement.SetInput(throttle, steer);
+        //Debug.Log($"Input throttle={throttle:F2} steer={steer:F2}");
 
-	private void OnEnable()
+    }
+    private void OnEnable()
 	{
 		m_ActionMap.Enable();
 
@@ -40,22 +50,22 @@ public class TankController : MonoBehaviour
 
 	private void Handle_AcceleratePerformed(InputAction.CallbackContext context)
 	{
-
+		throttle = context.ReadValue<float>();
 	}
 
 	private void Handle_AccelerateCanceled(InputAction.CallbackContext context)
 	{
-
+		throttle = 0.0f;
 	}
 
 	private void Handle_SteerPerformed(InputAction.CallbackContext context)
 	{
-
+		steer = context.ReadValue<float>();
 	}
 
 	private void Handle_SteerCanceled(InputAction.CallbackContext context)
 	{
-
+		steer = 0.0f;
 	}
 
 	private void Handle_FirePerformed(InputAction.CallbackContext context)
