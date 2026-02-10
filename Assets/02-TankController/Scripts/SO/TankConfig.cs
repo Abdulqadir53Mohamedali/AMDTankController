@@ -21,6 +21,8 @@ public class TankConfig : ScriptableObject
     // How much the spring has been squished | Displacment , how mch ahs it strehced form the natural length
     public float maxCompression  = 0.3f;
 
+    public float wheelRadius = 0.18f;  
+
     //[Header("Rotation")]
     //public float turretSpeed;
     //public float hullRotateLag;

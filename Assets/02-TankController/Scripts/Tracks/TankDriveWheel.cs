@@ -3,30 +3,30 @@ using UnityEngine;
 public class TankDriveWheel : MonoBehaviour
 {
 
-    private Rigidbody m_Rigidbody;
+    //private Rigidbody m_Rigidbody;
 
 
-    private void Awake()
-    {
-        m_Rigidbody = GetComponentInParent<Rigidbody>();
-    }
-    private void OnEnable()
-    {
-        TankMovement.onDriveWheelRaycast += ApplyForces;
-    }
+    //private void Awake()
+    //{
+    //    m_Rigidbody = GetComponentInParent<Rigidbody>();
+    //}
+    //private void OnEnable()
+    //{
+    //    TankMovement.onDriveWheelRaycast += ApplyForces;
+    //}
 
-    private void OnDisable()
-    {
-        TankMovement.onDriveWheelRaycast -= ApplyForces;
+    //private void OnDisable()
+    //{
+    //    TankMovement.onDriveWheelRaycast -= ApplyForces;
 
-    }
+    //}
 
 
-    private void ApplyForces(Vector3 LeftWheelForce, Vector3 RightWheelForce)
-    {
-        m_Rigidbody.AddForceAtPosition(RightWheelForce, transform.position);
+    //private void ApplyForces(Vector3 LeftWheelForce, Vector3 RightWheelForce)
+    //{
+    //    m_Rigidbody.AddForceAtPosition(RightWheelForce, transform.position);
 
-    }
+    //}
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

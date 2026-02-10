@@ -168,6 +168,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef7814a139b16234784615a773c8cd3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_DrivePoints:
+  - {fileID: 394274513}
 --- !u!1 &115009021
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,9 +905,6 @@ GameObject:
   - component: {fileID: 388173715}
   - component: {fileID: 388173717}
   - component: {fileID: 388173716}
-  - component: {fileID: 388173718}
-  - component: {fileID: 388173720}
-  - component: {fileID: 388173721}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -981,51 +980,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388173714}
   m_Mesh: {fileID: 4300002, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
---- !u!114 &388173718
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 388173714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &388173720
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 388173714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c89faf9ea596d1d459c9cbb85629ee88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!135 &388173721
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 388173714}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.70759827
-  m_Center: {x: 0, y: 0.00000008940697, z: -0.000000059604645}
 --- !u!1 &394274512
 GameObject:
   m_ObjectHideFlags: 0
@@ -1159,9 +1113,6 @@ GameObject:
   - component: {fileID: 604312206}
   - component: {fileID: 604312208}
   - component: {fileID: 604312207}
-  - component: {fileID: 604312209}
-  - component: {fileID: 604312211}
-  - component: {fileID: 604312212}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -1237,51 +1188,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 604312205}
   m_Mesh: {fileID: 4300002, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
---- !u!114 &604312209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604312205}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &604312211
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604312205}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c89faf9ea596d1d459c9cbb85629ee88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!135 &604312212
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604312205}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.70759827
-  m_Center: {x: 0, y: 0.000000029802322, z: -0.00000011920929}
 --- !u!1 &616172344
 GameObject:
   m_ObjectHideFlags: 0
@@ -1413,18 +1319,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Distance: 0
-  m_SurfaceNormal: {x: 0, y: 0, z: 0}
-  m_HitPoint: {x: 0, y: 0, z: 0}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
-  m_WheelPos: {fileID: 1017359242}
-  m_RestLength: 0
-  m_SpringStiffness: 0
-  m_DamperStrength: 0
-  m_MaxCompression: 0
-  m_IgnoreLayers:
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_GroundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
+  m_MaxWheelExtension: 0.35
+  m_WheelLerpSpeed: 12
+  m_WheelPos: {fileID: 1017359242}
 --- !u!1 &795188233
 GameObject:
   m_ObjectHideFlags: 0
@@ -2321,7 +2222,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 928874459}
   serializedVersion: 5
-  m_Mass: 200
+  m_Mass: 57020
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0.7, z: 0}
@@ -2354,10 +2255,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LeftDriveWheel: {fileID: 1566191698}
   RightDriveWheel: {fileID: 1692009105}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_LeftTrack: {fileID: 55085258}
+  m_RightTrack: {fileID: 1937698542}
+  m_LateralFriction: 1.2
   m_maxTrackForce: 0
   m_maxSpeed: 0
   m_Speed: 0
+  m_Acceleration: 8
+  m_TurnSharpness: 1
+  m_SteerAtLowSpeed: 1
+  m_SteerAtHighSpeed: 0.4
+  m_CoastingDrag: 0.79
 --- !u!1 &934198954
 GameObject:
   m_ObjectHideFlags: 0
@@ -2666,9 +2575,6 @@ GameObject:
   - component: {fileID: 1017359242}
   - component: {fileID: 1017359244}
   - component: {fileID: 1017359243}
-  - component: {fileID: 1017359245}
-  - component: {fileID: 1017359247}
-  - component: {fileID: 1017359248}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -2744,51 +2650,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1017359241}
   m_Mesh: {fileID: 4300006, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
---- !u!114 &1017359245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1017359241}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1017359247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1017359241}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1b49f42c2dab164f8cd294a9921eda3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!135 &1017359248
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1017359241}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.70759827
-  m_Center: {x: 0, y: 0.00000008940697, z: -0.000000059604645}
 --- !u!1 &1032749531
 GameObject:
   m_ObjectHideFlags: 0
@@ -2910,6 +2771,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef7814a139b16234784615a773c8cd3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_DrivePoints: []
 --- !u!1 &1087929408
 GameObject:
   m_ObjectHideFlags: 0
@@ -2955,18 +2817,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Distance: 0
-  m_SurfaceNormal: {x: 0, y: 0, z: 0}
-  m_HitPoint: {x: 0, y: 0, z: 0}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
-  m_WheelPos: {fileID: 388173715}
-  m_RestLength: 0
-  m_SpringStiffness: 0
-  m_DamperStrength: 0
-  m_MaxCompression: 0
-  m_IgnoreLayers:
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_GroundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
+  m_MaxWheelExtension: 0.35
+  m_WheelLerpSpeed: 12
+  m_WheelPos: {fileID: 388173715}
 --- !u!1 &1124852847
 GameObject:
   m_ObjectHideFlags: 0
@@ -3336,18 +3193,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Distance: 0
-  m_SurfaceNormal: {x: 0, y: 0, z: 0}
-  m_HitPoint: {x: 0, y: 0, z: 0}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
-  m_WheelPos: {fileID: 1325602300}
-  m_RestLength: 0
-  m_SpringStiffness: 0
-  m_DamperStrength: 0
-  m_MaxCompression: 0
-  m_IgnoreLayers:
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_GroundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
+  m_MaxWheelExtension: 0.35
+  m_WheelLerpSpeed: 12
+  m_WheelPos: {fileID: 1325602300}
 --- !u!1 &1235931972
 GameObject:
   m_ObjectHideFlags: 0
@@ -3469,9 +3321,6 @@ GameObject:
   - component: {fileID: 1282588305}
   - component: {fileID: 1282588307}
   - component: {fileID: 1282588306}
-  - component: {fileID: 1282588308}
-  - component: {fileID: 1282588310}
-  - component: {fileID: 1282588311}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -3547,51 +3396,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1282588304}
   m_Mesh: {fileID: 4300006, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
---- !u!114 &1282588308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1282588304}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1282588310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1282588304}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1b49f42c2dab164f8cd294a9921eda3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!135 &1282588311
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1282588304}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.70759827
-  m_Center: {x: 0, y: 0.000000029802322, z: -0.00000011920929}
 --- !u!1 &1325602299
 GameObject:
   m_ObjectHideFlags: 0
@@ -3603,9 +3407,6 @@ GameObject:
   - component: {fileID: 1325602300}
   - component: {fileID: 1325602302}
   - component: {fileID: 1325602301}
-  - component: {fileID: 1325602303}
-  - component: {fileID: 1325602305}
-  - component: {fileID: 1325602306}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -3681,51 +3482,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1325602299}
   m_Mesh: {fileID: 4300006, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
---- !u!114 &1325602303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1325602299}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1325602305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1325602299}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1b49f42c2dab164f8cd294a9921eda3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!135 &1325602306
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1325602299}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.70759827
-  m_Center: {x: 0, y: -0.000000029802322, z: -0.00000023841858}
 --- !u!1 &1566191697
 GameObject:
   m_ObjectHideFlags: 0
@@ -3974,18 +3730,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Distance: 0
-  m_SurfaceNormal: {x: 0, y: 0, z: 0}
-  m_HitPoint: {x: 0, y: 0, z: 0}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
-  m_WheelPos: {fileID: 604312206}
-  m_RestLength: 0
-  m_SpringStiffness: 0
-  m_DamperStrength: 0
-  m_MaxCompression: 0
-  m_IgnoreLayers:
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_GroundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
+  m_MaxWheelExtension: 0.35
+  m_WheelLerpSpeed: 12
+  m_WheelPos: {fileID: 604312206}
 --- !u!1 &1692009104
 GameObject:
   m_ObjectHideFlags: 0
@@ -4171,18 +3922,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Distance: 0
-  m_SurfaceNormal: {x: 0, y: 0, z: 0}
-  m_HitPoint: {x: 0, y: 0, z: 0}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
-  m_WheelPos: {fileID: 1803464509}
-  m_RestLength: 0
-  m_SpringStiffness: 0
-  m_DamperStrength: 0
-  m_MaxCompression: 0
-  m_IgnoreLayers:
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_GroundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
+  m_MaxWheelExtension: 0.35
+  m_WheelLerpSpeed: 12
+  m_WheelPos: {fileID: 1803464509}
 --- !u!1 &1803464508
 GameObject:
   m_ObjectHideFlags: 0
@@ -4194,10 +3940,6 @@ GameObject:
   - component: {fileID: 1803464509}
   - component: {fileID: 1803464511}
   - component: {fileID: 1803464510}
-  - component: {fileID: 1803464512}
-  - component: {fileID: 1803464513}
-  - component: {fileID: 1803464515}
-  - component: {fileID: 1803464516}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -4273,74 +4015,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1803464508}
   m_Mesh: {fileID: 4300002, guid: a248095cd7ac3014189fd07ba1a73b6b, type: 3}
---- !u!114 &1803464512
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1803464508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfa52f6b66171614cb3130faf5405c29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!136 &1803464513
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1803464508}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.70759827
-  m_Height: 2.1227949
-  m_Direction: 1
-  m_Center: {x: 0, y: -0.00000011920929, z: -0.00000023841858}
---- !u!114 &1803464515
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1803464508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c89faf9ea596d1d459c9cbb85629ee88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!135 &1803464516
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1803464508}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.70759827
-  m_Center: {x: 0, y: -0.000000029802322, z: -0.00000023841858}
 --- !u!1 &1851593818
 GameObject:
   m_ObjectHideFlags: 0
@@ -4386,18 +4060,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fd49ad63a7cb24c9e571aa47ecd4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Distance: 0
-  m_SurfaceNormal: {x: 0, y: 0, z: 0}
-  m_HitPoint: {x: 0, y: 0, z: 0}
-  m_TankConfig: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
-  m_WheelPos: {fileID: 1282588305}
-  m_RestLength: 0
-  m_SpringStiffness: 0
-  m_DamperStrength: 0
-  m_MaxCompression: 0
-  m_IgnoreLayers:
+  m_Config: {fileID: 11400000, guid: b35e2cbf9b4fedf408c5cca8001c154f, type: 2}
+  m_GroundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
+  m_MaxWheelExtension: 0.35
+  m_WheelLerpSpeed: 12
+  m_WheelPos: {fileID: 1282588305}
 --- !u!1 &1896376904
 GameObject:
   m_ObjectHideFlags: 0
@@ -4673,6 +4342,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef7814a139b16234784615a773c8cd3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_DrivePoints:
+  - {fileID: 795188234}
 --- !u!1 &2080278627
 GameObject:
   m_ObjectHideFlags: 0

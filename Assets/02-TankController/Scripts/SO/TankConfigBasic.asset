@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxTrackForce: 2500
   maxSpeed: 12
-  restLength: 0.6
+  restLength: 0.8
   springStiffnes: 350000
   damperStrength: 4500
-  maxCompression: 0.3
+  maxCompression: 0.75
+  wheelRadius: 0.18
