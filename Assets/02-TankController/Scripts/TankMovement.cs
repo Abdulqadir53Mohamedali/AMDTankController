@@ -20,7 +20,17 @@ public class TankMovement : MonoBehaviour
     [SerializeField] private TankTrack m_RightTrack;
 
     [SerializeField] private float m_LateralFriction = 0.85f;   // 0 = no kill, 1 = strong kill
+    [SerializeField] private float m_LateralFrictionPerSecond = 8f; // try 6–15
+    [SerializeField] private float m_MaxYawDegPerSec = 120f; // try 90–180
+    [SerializeField] private float m_MaxForcePerTrack = 1200f; // start near your current feel
 
+
+
+
+    [Header("Steering (MoveRotation)")]
+    [SerializeField] private float m_TurnSpeedDegPerSec = 90f;     // try 60–140
+    [SerializeField] private float m_TurnAtHighSpeed = 0.4f;       // like your friend
+    [SerializeField] private bool m_AllowPivotTurn = true;
     private Rigidbody m_Rigidbody;
     [Header("Base Drive Values")]
     [SerializeField] private float m_maxTrackForce;
@@ -78,12 +88,27 @@ public class TankMovement : MonoBehaviour
         }
 
         UpdateDrive();
+        ApplySteeringMoveRotation();   // NEW
+
         ApplySideFriction();
         ApplyForwardDrag();
         ApplyPitchRollDamping();
-        //ApplyTurnDamping();        // NEW
-
+        ApplyTurnDamping();        // NEW
+        LimitYawRate();
         LimitForwardSpeed();
+    }
+
+    private void LimitYawRate()
+    {
+        float maxYawRad = m_MaxYawDegPerSec * Mathf.Deg2Rad;
+
+        Vector3 angVel = m_Rigidbody.angularVelocity;
+        float yaw = Vector3.Dot(angVel, Vector3.up);
+        yaw = Mathf.Clamp(yaw, -maxYawRad, maxYawRad);
+
+        // keep pitch/roll unchanged
+        Vector3 pr = angVel - Vector3.up * Vector3.Dot(angVel, Vector3.up);
+        m_Rigidbody.angularVelocity = pr + Vector3.up * yaw;
     }
     private void ApplyPitchRollDamping()
     {
@@ -108,31 +133,34 @@ public class TankMovement : MonoBehaviour
         Vector3 yawComponent = Vector3.Project(angVel, Vector3.up);
         m_Rigidbody.angularVelocity = yawComponent + right * pitch + forward * roll;
     }
+    private void ApplyTurnDamping()
+    {
+        // only when you're not actively steering
+        if (Mathf.Abs(m_Steer) > 0.05f && Mathf.Abs(m_Throttle) > 0.05f) return;
+
+
+        Vector3 angVel = m_Rigidbody.angularVelocity;
+        // kill yaw (around global up)
+        float yaw = Vector3.Dot(angVel, Vector3.up);
+        float decay = Mathf.Exp(-m_TurnDrag * Time.fixedDeltaTime);
+        yaw *= decay;
+
+        // rebuild angular velocity with damped yaw
+        Vector3 lateral = angVel - Vector3.up * yaw;
+        m_Rigidbody.angularVelocity = lateral + Vector3.up * yaw;
+    }
     private void UpdateDrive()
     {
-        float currentForward = CurrentSpeed;
+        float currentForward = Vector3.Dot(m_Rigidbody.linearVelocity, transform.forward);
         float desiredSpeed = m_Throttle * m_Config.maxSpeed;
 
-        // Smooths target speed for better acceleration/ acceleration feel
-        m_TargetSpeed = Mathf.MoveTowards(  m_TargetSpeed, desiredSpeed, m_Acceleration * Time.fixedDeltaTime );
-
+        m_TargetSpeed = Mathf.MoveTowards(m_TargetSpeed, desiredSpeed, m_Acceleration * Time.fixedDeltaTime);
         float speedDelta = m_TargetSpeed - currentForward;
 
-        // base drive force (before steering split)
-        Vector3 baseForce = transform.forward * (speedDelta * m_Config.maxTrackForce);
+        Vector3 driveForce = transform.forward * (speedDelta * m_Config.maxTrackForce);
 
-        // Steering: determine how much to bias left vs right
-        float speed = Mathf.InverseLerp(0f, m_Config.maxSpeed, Mathf.Abs(currentForward));
-        float steerScale = Mathf.Lerp(m_SteerAtLowSpeed, m_SteerAtHighSpeed, speed);
-
-        float steerAmount = m_Steer * steerScale * m_TurnSharpness;
-
-        // Differential: left gets more force when steering right, etc.
-        float leftFactor = Mathf.Clamp01(1f - steerAmount);
-        float rightFactor = Mathf.Clamp01(1f + steerAmount);
-
-        ApplyForceToTrack(m_LeftTrack, baseForce * leftFactor);
-        ApplyForceToTrack(m_RightTrack, baseForce * rightFactor);
+        ApplyForceToTrack(m_LeftTrack, driveForce);
+        ApplyForceToTrack(m_RightTrack, driveForce);
     }
 
     private void ApplySideFriction()
@@ -146,32 +174,34 @@ public class TankMovement : MonoBehaviour
         Vector3 localVel = transform.InverseTransformDirection(m_Rigidbody.linearVelocity);
 
         // x = sideways, z = forward in tank local space.
-        float lateral = localVel.x;
-
-        // Blend towards zero sideways speed: more traction => stronger correction.
-        float frictionStrength = m_LateralFriction * avgTraction;
-        localVel.x = Mathf.Lerp(lateral, 0f, frictionStrength * Time.fixedDeltaTime);
+        float k = Mathf.Exp(-m_LateralFrictionPerSecond * avgTraction * Time.fixedDeltaTime);
+        localVel.x *= k;
 
         // Convert back to world space.
         m_Rigidbody.linearVelocity = transform.TransformDirection(localVel);
     }
+    private void ApplySteeringMoveRotation()
+    {
+        // If you don't allow pivot turns, require some throttle like your friend's script does.
+        if (!m_AllowPivotTurn && Mathf.Abs(m_Throttle) < 0.05f)
+            return;
 
-    //private void ApplyTurnDamping()
-    //{
-    //    // only when you're not actively steering
-    //    if (Mathf.Abs(m_Steer) > 0.05f)
-    //        return;
+        // Optional: also reduce steering if traction is low (prevents spinning in air)
+        float traction = (m_LeftTrack.TractionFactor + m_RightTrack.TractionFactor) * 0.5f;
+        if (traction < 0.05f)
+            return;
 
-    //    Vector3 angVel = m_Rigidbody.angularVelocity;
-    //    // kill yaw (around global up)
-    //    float yaw = Vector3.Dot(angVel, Vector3.up);
-    //    float decay = Mathf.Exp(-m_TurnDrag * Time.fixedDeltaTime);
-    //    yaw *= decay;
+        float forwardSpeed = Mathf.Abs(Vector3.Dot(m_Rigidbody.linearVelocity, transform.forward));
+        float speed01 = Mathf.InverseLerp(0f, m_Config.maxSpeed, forwardSpeed);
 
-    //    // rebuild angular velocity with damped yaw
-    //    Vector3 lateral = angVel - Vector3.up * yaw;
-    //    m_Rigidbody.angularVelocity = lateral + Vector3.up * yaw;
-    //}
+        float steeringScale = Mathf.Lerp(1f, m_TurnAtHighSpeed, speed01);
+
+        float turnDeg = m_Steer * m_TurnSpeedDegPerSec * steeringScale * traction * Time.fixedDeltaTime;
+
+        Quaternion delta = Quaternion.Euler(0f, turnDeg, 0f);
+        m_Rigidbody.MoveRotation(m_Rigidbody.rotation * delta);
+    }
+
     private void ApplyForwardDrag()
     {
         // when no throttle, gently slow forward velocity
@@ -205,14 +235,27 @@ public class TankMovement : MonoBehaviour
             return;
         }
 
-        // Scale by traction and mass so behaviour is mass independent-ish
-        Vector3 TotalForce = totalForce * traction;
-        Vector3 forcePerPoint = TotalForce / drivePoints.Count;
+
+        // Scale by traction
+        Vector3 total = totalForce * traction;
+
+        // Cap the magnitude so one frame can’t inject a huge force spike
+        total = Vector3.ClampMagnitude(total, m_MaxForcePerTrack);
+
+        Vector3 forcePerPoint = total / drivePoints.Count;
 
         foreach (var point in drivePoints)
         {
             m_Rigidbody.AddForceAtPosition(forcePerPoint, point.position, ForceMode.Force);
         }
+        //// Scale by traction and mass so behaviour is mass independent-ish
+        //Vector3 TotalForce = totalForce * traction;
+        //Vector3 forcePerPoint = TotalForce / drivePoints.Count;
+
+        //foreach (var point in drivePoints)
+        //{
+        //    m_Rigidbody.AddForceAtPosition(forcePerPoint, point.position, ForceMode.Force);
+        //}
     }
 
     private void LimitForwardSpeed()
@@ -260,3 +303,4 @@ public class TankMovement : MonoBehaviour
 
 //}
 // Update is called once per frame
+
