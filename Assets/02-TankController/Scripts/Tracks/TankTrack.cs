@@ -27,17 +27,17 @@ public class TankTrack : MonoBehaviour
     {
         m_SuspensionArmsGroup = GetComponentsInChildren<TankSuspesnionArm>();
 
-        if (m_DrivePoints.Count == 0)
-        {
-            // Auto-pick children named "Wheel" as drive points 
-            foreach (Transform t in GetComponentsInChildren<Transform>())
-            {
-                if (t.name.Contains("DriveWheel"))
-                {
-                    m_DrivePoints.Add(t);
-                }
-            }
-        }
+        //if (m_DrivePoints.Count == 0)
+        //{
+        //    // Auto-pick children named "Wheel" as drive points 
+        //    foreach (Transform t in GetComponentsInChildren<Transform>())
+        //    {
+        //        if (t.name.Contains("DriveWheel"))
+        //        {
+        //            m_DrivePoints.Add(t);
+        //        }
+        //    }
+        //}
     }
 
     private void FixedUpdate()

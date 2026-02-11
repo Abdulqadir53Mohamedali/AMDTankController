@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fa5a7e4a1f6fdf479a5558abe889437, type: 3}
   m_Name: TankConfigBasic
   m_EditorClassIdentifier: 
-  maxTrackForce: 2500
-  maxSpeed: 12
-  restLength: 0.8
-  springStiffnes: 350000
-  damperStrength: 4500
-  maxCompression: 0.75
-  wheelRadius: 0.18
+  maxTrackForce: 600
+  maxSpeed: 8.2
+  restLength: 0.2
+  springStiffnes: 4000
+  damperStrength: 1500
+  maxCompression: 0.32
+  wheelRadius: 0.35

@@ -5,7 +5,7 @@ public class TankConfig : ScriptableObject
 {
     [Header("Drive")]
     // Maximum track force in which a track can push agaianst the ground
-    public float maxTrackForce = 2500f;
+    public float maxTrackForce = 10000f;
     // Limit to max speed
     public float maxSpeed = 12f;
 

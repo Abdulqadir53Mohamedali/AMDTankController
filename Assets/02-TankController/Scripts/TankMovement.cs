@@ -10,6 +10,7 @@ public class TankMovement : MonoBehaviour
     public Transform LeftDriveWheel;
     public Transform RightDriveWheel;
 
+    [SerializeField] private float m_PitchRollDamping = 1.2f;
 
     [Header("Config")]
     [SerializeField] private TankConfig m_Config;
@@ -34,6 +35,7 @@ public class TankMovement : MonoBehaviour
     [SerializeField] private float m_SteerAtLowSpeed = 1.0f;   
     [SerializeField] private float m_SteerAtHighSpeed = 0.4f;
 
+    [SerializeField] private float m_TurnDrag = 2.5f;   // tweak 1–5
 
     [SerializeField] private float m_CoastingDrag = 0.5f;  // try 0.5–1.5
 
@@ -77,10 +79,35 @@ public class TankMovement : MonoBehaviour
 
         UpdateDrive();
         ApplySideFriction();
-        ApplyForwardDrag();    
+        ApplyForwardDrag();
+        ApplyPitchRollDamping();
+        //ApplyTurnDamping();        // NEW
+
         LimitForwardSpeed();
     }
+    private void ApplyPitchRollDamping()
+    {
+        // Only when not actively accelerating (so it doesn't feel like glue while driving)
+        if (Mathf.Abs(m_Throttle) > 0.05f) return;
 
+        Vector3 angVel = m_Rigidbody.angularVelocity;
+
+        // Remove pitch (around tank right) and roll (around tank forward)
+        Vector3 right = transform.right;
+        Vector3 forward = transform.forward;
+
+        float pitch = Vector3.Dot(angVel, right);
+        float roll = Vector3.Dot(angVel, forward);
+
+        float decay = Mathf.Exp(-m_PitchRollDamping * Time.fixedDeltaTime);
+
+        pitch *= decay;
+        roll *= decay;
+
+        // Rebuild angular velocity: keep yaw as-is, damp pitch/roll
+        Vector3 yawComponent = Vector3.Project(angVel, Vector3.up);
+        m_Rigidbody.angularVelocity = yawComponent + right * pitch + forward * roll;
+    }
     private void UpdateDrive()
     {
         float currentForward = CurrentSpeed;
@@ -129,7 +156,22 @@ public class TankMovement : MonoBehaviour
         m_Rigidbody.linearVelocity = transform.TransformDirection(localVel);
     }
 
+    //private void ApplyTurnDamping()
+    //{
+    //    // only when you're not actively steering
+    //    if (Mathf.Abs(m_Steer) > 0.05f)
+    //        return;
 
+    //    Vector3 angVel = m_Rigidbody.angularVelocity;
+    //    // kill yaw (around global up)
+    //    float yaw = Vector3.Dot(angVel, Vector3.up);
+    //    float decay = Mathf.Exp(-m_TurnDrag * Time.fixedDeltaTime);
+    //    yaw *= decay;
+
+    //    // rebuild angular velocity with damped yaw
+    //    Vector3 lateral = angVel - Vector3.up * yaw;
+    //    m_Rigidbody.angularVelocity = lateral + Vector3.up * yaw;
+    //}
     private void ApplyForwardDrag()
     {
         // when no throttle, gently slow forward velocity
@@ -187,33 +229,34 @@ public class TankMovement : MonoBehaviour
         float clampedForwardSpeed = Mathf.Clamp(forward, -max, max);
         m_Rigidbody.linearVelocity = transform.forward * clampedForwardSpeed + lateral;
     }
-    //public void TotalTrackForce()
-    //{
 
-    //    //Throttle = Mathf.Clamp(Throttle,-1,0f, 1.0f);
-    //    //Steer = Mathf.Clamp(Steer,-1,0f, 1.0f);
-
-    //    float LeftForce = (currentThrottle - currentSteer) * m_maxTrackForce;
-    //    float RightForce = (currentThrottle + currentSteer) * m_maxTrackForce;
-
-    //    //LeftForce = Mathf.Clamp(LeftForce,-LeftForce,m_maxTrackForce);
-    //    //RightForce = Mathf.Clamp(RightForce,RightForce,m_maxTrackForce);
-        
-    //    Vector3 forceDirection = transform.forward;
-
-    //    Vector3 leftforce = forceDirection * LeftForce;
-    //    Vector3 rightforce = forceDirection * RightForce;
-
-
-    //    Debug.Log($"throttle={currentThrottle:F2} steer={currentSteer:F2} " +
-    //      $"m_maxTrackForce={m_maxTrackForce:F1} LeftForce={LeftForce:F1} RightForce={RightForce:F1} " +
-    //      $"| leftMag={leftforce.magnitude:F1} rightMag={rightforce.magnitude:F1}");
-
-    //    //onSuspensionRaycast
-    //    onDriveWheelRaycast?.Invoke( leftforce, rightforce );
-    //    //m_Rigidbody.AddForceAtPosition(leftforce, LeftDriveWheel.position);
-    //    //m_Rigidbody.AddForceAtPosition(rightforce, RightDriveWheel.position);
-
-    //}
-    // Update is called once per frame
 }
+//public void TotalTrackForce()
+//{
+
+//    //Throttle = Mathf.Clamp(Throttle,-1,0f, 1.0f);
+//    //Steer = Mathf.Clamp(Steer,-1,0f, 1.0f);
+
+//    float LeftForce = (currentThrottle - currentSteer) * m_maxTrackForce;
+//    float RightForce = (currentThrottle + currentSteer) * m_maxTrackForce;
+
+//    //LeftForce = Mathf.Clamp(LeftForce,-LeftForce,m_maxTrackForce);
+//    //RightForce = Mathf.Clamp(RightForce,RightForce,m_maxTrackForce);
+
+//    Vector3 forceDirection = transform.forward;
+
+//    Vector3 leftforce = forceDirection * LeftForce;
+//    Vector3 rightforce = forceDirection * RightForce;
+
+
+//    Debug.Log($"throttle={currentThrottle:F2} steer={currentSteer:F2} " +
+//      $"m_maxTrackForce={m_maxTrackForce:F1} LeftForce={LeftForce:F1} RightForce={RightForce:F1} " +
+//      $"| leftMag={leftforce.magnitude:F1} rightMag={rightforce.magnitude:F1}");
+
+//    //onSuspensionRaycast
+//    onDriveWheelRaycast?.Invoke( leftforce, rightforce );
+//    //m_Rigidbody.AddForceAtPosition(leftforce, LeftDriveWheel.position);
+//    //m_Rigidbody.AddForceAtPosition(rightforce, RightDriveWheel.position);
+
+//}
+// Update is called once per frame
