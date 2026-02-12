@@ -1,0 +1,123 @@
+using System;
+using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody))]
+public class TankUIEvents: MonoBehaviour
+{
+    public enum MoveDir { Idle, Forward, Reverse }
+
+    [Header("Refs")]
+    [SerializeField] private TankWeapon m_Weapon;
+
+    [Header("Gun Refs (for elevation)")]
+    [SerializeField] private Transform m_Turret;
+    [SerializeField] private Transform m_Barrel;
+
+    [Header("Thresholds")]
+    [SerializeField] private float m_SpeedEpsilon = 0.05f;     // m/s
+    [SerializeField] private float m_HeadingEpsilon = 0.5f;    // deg
+    [SerializeField] private float m_ElevationEpsilon = 0.25f; // deg
+
+    public event Action<float> SpeedChanged;
+    public event Action<MoveDir> DirectionChanged;
+    public event Action<float> HeadingChanged;
+
+    public event Action<float> GunElevationChanged; // degrees (+ up, - down)
+
+    public event Action<bool> WeaponReadyChanged;
+    public event Action WeaponFired;
+
+    private Rigidbody m_Rb;
+
+    private float m_LastSpeed = float.NaN;
+    private float m_LastHeading = float.NaN;
+    private float m_LastElevation = float.NaN;
+    private MoveDir m_LastDir = (MoveDir)(-1);
+
+    private void Awake()
+    {
+        m_Rb = GetComponent<Rigidbody>();
+    }
+
+    private void OnEnable()
+    {
+        if (m_Weapon != null)
+        {
+            m_Weapon.ReadyStateChanged += HandleWeaponReadyChanged;
+            m_Weapon.Fired += HandleWeaponFired;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (m_Weapon != null)
+        {
+            m_Weapon.ReadyStateChanged -= HandleWeaponReadyChanged;
+            m_Weapon.Fired -= HandleWeaponFired;
+        }
+    }
+
+    private void Update()
+    {
+        PublishSpeedAndDir();
+        PublishHeading();
+        PublishGunElevation();
+    }
+
+    private void PublishSpeedAndDir()
+    {
+        Vector3 v = m_Rb.linearVelocity;
+
+        float speed = v.magnitude;
+        float forwardSpeed = Vector3.Dot(v, transform.forward);
+
+        MoveDir dir =
+            Mathf.Abs(forwardSpeed) < 0.05f ? MoveDir.Idle :
+            (forwardSpeed > 0f ? MoveDir.Forward : MoveDir.Reverse);
+
+        if (float.IsNaN(m_LastSpeed) || Mathf.Abs(speed - m_LastSpeed) > m_SpeedEpsilon)
+        {
+            m_LastSpeed = speed;
+            SpeedChanged?.Invoke(speed);
+        }
+
+        if (dir != m_LastDir)
+        {
+            m_LastDir = dir;
+            DirectionChanged?.Invoke(dir);
+        }
+    }
+
+    private void PublishHeading()
+    {
+        float heading = transform.eulerAngles.y; // 0..360
+
+        if (float.IsNaN(m_LastHeading) || Mathf.Abs(Mathf.DeltaAngle(m_LastHeading, heading)) > m_HeadingEpsilon)
+        {
+            m_LastHeading = heading;
+            HeadingChanged?.Invoke(heading);
+        }
+    }
+
+    private void PublishGunElevation()
+    {
+        if (m_Turret == null || m_Barrel == null)
+            return;
+
+        // Convert barrel forward into turret-local space. [web:420]
+        Vector3 localBarrelForward = m_Turret.InverseTransformDirection(m_Barrel.forward); // [web:420]
+        localBarrelForward.Normalize();
+
+        // Pitch/elevation in degrees: + up, - down.
+        float elevationDeg = Mathf.Asin(Mathf.Clamp(localBarrelForward.y, -1f, 1f)) * Mathf.Rad2Deg;
+
+        if (float.IsNaN(m_LastElevation) || Mathf.Abs(elevationDeg - m_LastElevation) > m_ElevationEpsilon)
+        {
+            m_LastElevation = elevationDeg;
+            GunElevationChanged?.Invoke(elevationDeg);
+        }
+    }
+
+    private void HandleWeaponReadyChanged(bool ready) => WeaponReadyChanged?.Invoke(ready);
+    private void HandleWeaponFired() => WeaponFired?.Invoke();
+}
