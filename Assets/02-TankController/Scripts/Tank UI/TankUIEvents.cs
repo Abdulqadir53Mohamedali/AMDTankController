@@ -8,6 +8,8 @@ public class TankUIEvents: MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private TankWeapon m_Weapon;
+    [SerializeField] private TankMovement m_Movement;
+
 
     [Header("Gun Refs (for elevation)")]
     [SerializeField] private Transform m_Turret;
@@ -24,6 +26,8 @@ public class TankUIEvents: MonoBehaviour
 
     public event Action<float> GunElevationChanged; // degrees (+ up, - down)
 
+    public event Action<bool> SlippingChanged;
+
     public event Action<bool> WeaponReadyChanged;
     public event Action WeaponFired;
 
@@ -33,6 +37,8 @@ public class TankUIEvents: MonoBehaviour
     private float m_LastHeading = float.NaN;
     private float m_LastElevation = float.NaN;
     private MoveDir m_LastDir = (MoveDir)(-1);
+    private bool m_LastSlip = false;
+
 
     private void Awake()
     {
@@ -62,8 +68,20 @@ public class TankUIEvents: MonoBehaviour
         PublishSpeedAndDir();
         PublishHeading();
         PublishGunElevation();
-    }
+        PublishSlipping();
 
+    }
+    private void PublishSlipping()
+    {
+        if (m_Movement == null) return;
+
+        bool slip = m_Movement.IsSlipping;
+        if (slip != m_LastSlip)
+        {
+            m_LastSlip = slip;
+            SlippingChanged?.Invoke(slip);
+        }
+    }
     private void PublishSpeedAndDir()
     {
         Vector3 v = m_Rb.linearVelocity;

@@ -196,40 +196,4 @@ public class TankSuspesnionArm : MonoBehaviour
 
 }
 
-//public void SpringCheck()
-//{
-//    if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.5f, m_RaycastMask, QueryTriggerInteraction.Ignore))
-//    {
-//        m_Distance = hit.distance;
-//        m_SurfaceNormal = hit.normal;
-//        m_HitPoint = hit.point;
-
-//        Debug.DrawLine(transform.position, hit.point, Color.green); // hit point in green
-
-//    }
-
-//}
-
-
-//public float HookesCalculation()
-//{
-
-//    m_Comrpession = m_RestLength * m_Distance;
-
-//    m_Comrpession = Mathf.Clamp(m_Comrpession,0.0f,m_MaxCompression);
-
-
-
-//    return m_SpringStiffness * m_Comrpession;
-//}
-
-//public float TotalForce()
-//{
-
-//    m_SpringForce = HookesCalculation();
-//    m_DampForce = DampeningCalculation();
-
-//    return m_SpringForce + m_DampForce;
-
-//}
 

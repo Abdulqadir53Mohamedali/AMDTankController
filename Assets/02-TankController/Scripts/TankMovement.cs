@@ -25,6 +25,28 @@ public class TankMovement : MonoBehaviour
     [SerializeField] private float m_MaxForcePerTrack = 1200f; // start near your current feel
 
 
+    [Header("Slope Grip")]
+    [SerializeField] private LayerMask m_GroundMask = ~0;
+
+    [SerializeField] private float m_HoldMaxAngleDeg = 18f;        // <= THIS is your “start slipping angle”
+    [SerializeField] private float m_HoldSpeedThreshold = 0.25f;   // only hold when nearly stopped
+    [SerializeField, Range(0f, 1f)] private float m_HoldStrength = 1.0f; // 1 = fully cancels downhill accel
+
+    [SerializeField] private float m_SlipMaxAngleDeg = 40f;        // above this, tank will slide (more)
+    [SerializeField, Range(0f, 1f)] private float m_SlipAssist = 0.35f;  // 0 = pure physics slide, 1 = strong assist
+
+    [SerializeField] private float m_NoSlipAngleDeg = 8f;      // <= gentle ramps: never creep
+    [SerializeField] private float m_MinGroundedRatio = 0.8f;  // require most arms grounded
+
+    [Header("Slip Detect (for UI)")]
+    [SerializeField] private float m_SlipUiMinDownhillSpeed = 0.35f; // m/s needed before we call it slipping
+    [SerializeField] private float m_SlipUiOnDelay = 0.25f;          // seconds sustained
+    [SerializeField] private float m_SlipUiOffDelay = 0.35f;
+
+    public bool IsSlipping { get; private set; }
+    public float LastSlopeAngleDeg { get; private set; }
+    private float m_SlipTimer;
+
 
 
     [Header("Steering (MoveRotation)")]
@@ -95,9 +117,87 @@ public class TankMovement : MonoBehaviour
         ApplyPitchRollDamping();
         ApplyTurnDamping();        // NEW
         LimitYawRate();
+        ApplySlopeGripAssist();
         LimitForwardSpeed();
     }
+    private void ApplySlopeGripAssist()
+    {
+        // Only assist when player isn't asking to move
+        if (Mathf.Abs(m_Throttle) > 0.05f) { UpdateSlipState(false); return; }
 
+        // Need decent contact, otherwise you get “air brakes”
+        float traction = (m_LeftTrack.TractionFactor + m_RightTrack.TractionFactor) * 0.5f;
+        if (traction < 0.5f) return;
+
+        // Raycast down to find the supporting surface normal. [web:492]
+        Vector3 origin = m_Rigidbody.worldCenterOfMass;
+        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 3.0f, m_GroundMask, QueryTriggerInteraction.Ignore))
+            return; // [web:492]
+
+        // Slope angle from the ground normal. [web:504]
+        float slopeAngle = Vector3.Angle(hit.normal, Vector3.up); // [web:504]
+
+        // Gravity component along the slope plane. [web:496][web:481]
+        Vector3 gravity = Physics.gravity; // [web:496]
+        Vector3 gravityAlongSlope = Vector3.ProjectOnPlane(gravity, hit.normal); // [web:481]
+
+        // If gravity is basically perpendicular to the plane, nothing to do.
+        if (gravityAlongSlope.sqrMagnitude < 0.0001f) 
+        {
+            UpdateSlipState(false);
+            return; 
+        }
+        LastSlopeAngleDeg = slopeAngle;
+
+
+        Vector3 slopeDownDir = gravityAlongSlope.normalized; // [web:557]
+        float downhillSpeed = Vector3.Dot(m_Rigidbody.linearVelocity, slopeDownDir); // [web:552]
+
+        bool slippingNow =
+            slopeAngle > m_HoldMaxAngleDeg &&
+            downhillSpeed > m_SlipUiMinDownhillSpeed;
+
+        // If you're in the "no slip" zone, never show slipping UI
+        if (slopeAngle <= m_NoSlipAngleDeg)
+            slippingNow = false;
+
+        UpdateSlipState(slippingNow);
+        // 1) Near-flat / mild slopes: “hill hold”
+        if (slopeAngle <= m_NoSlipAngleDeg)
+        {
+            // Cancel gravity along slope fully (no traction scaling). [web:503][web:531]
+            m_Rigidbody.AddForce(-gravityAlongSlope, ForceMode.Acceleration); // [web:503][web:531]
+
+            // Remove along-slope velocity so it cannot accumulate. [web:525]
+            Vector3 downDir = gravityAlongSlope.normalized;
+            Vector3 v = m_Rigidbody.linearVelocity; // [web:525]
+            float along = Vector3.Dot(v, downDir);
+            m_Rigidbody.linearVelocity = v - downDir * along; // [web:525]
+            return;
+        }
+
+
+        // 2) Steeper slopes: allow sliding, but optionally reduce it (tank has “grip”)
+        // Blend assist between hold angle and slip max angle.
+        float t = Mathf.InverseLerp(m_HoldMaxAngleDeg, m_SlipMaxAngleDeg, slopeAngle);
+        float assist = Mathf.Lerp(0f, m_SlipAssist, t);
+
+        m_Rigidbody.AddForce(-gravityAlongSlope * assist * traction, ForceMode.Acceleration); // [web:503][web:505]
+    }
+
+    private void UpdateSlipState(bool slippingNow)
+    {
+        if (slippingNow)
+        {
+            m_SlipTimer = Mathf.Min(m_SlipUiOnDelay, m_SlipTimer + Time.fixedDeltaTime); // [web:559]
+            if (m_SlipTimer >= m_SlipUiOnDelay) IsSlipping = true;
+        }
+        else
+        {
+            m_SlipTimer = Mathf.Max(-m_SlipUiOffDelay, m_SlipTimer - Time.fixedDeltaTime); // [web:559]
+            if (m_SlipTimer <= -m_SlipUiOffDelay) IsSlipping = false;
+        }
+    }
     private void LimitYawRate()
     {
         float maxYawRad = m_MaxYawDegPerSec * Mathf.Deg2Rad;
@@ -274,33 +374,5 @@ public class TankMovement : MonoBehaviour
     }
 
 }
-//public void TotalTrackForce()
-//{
 
-//    //Throttle = Mathf.Clamp(Throttle,-1,0f, 1.0f);
-//    //Steer = Mathf.Clamp(Steer,-1,0f, 1.0f);
-
-//    float LeftForce = (currentThrottle - currentSteer) * m_maxTrackForce;
-//    float RightForce = (currentThrottle + currentSteer) * m_maxTrackForce;
-
-//    //LeftForce = Mathf.Clamp(LeftForce,-LeftForce,m_maxTrackForce);
-//    //RightForce = Mathf.Clamp(RightForce,RightForce,m_maxTrackForce);
-
-//    Vector3 forceDirection = transform.forward;
-
-//    Vector3 leftforce = forceDirection * LeftForce;
-//    Vector3 rightforce = forceDirection * RightForce;
-
-
-//    Debug.Log($"throttle={currentThrottle:F2} steer={currentSteer:F2} " +
-//      $"m_maxTrackForce={m_maxTrackForce:F1} LeftForce={LeftForce:F1} RightForce={RightForce:F1} " +
-//      $"| leftMag={leftforce.magnitude:F1} rightMag={rightforce.magnitude:F1}");
-
-//    //onSuspensionRaycast
-//    onDriveWheelRaycast?.Invoke( leftforce, rightforce );
-//    //m_Rigidbody.AddForceAtPosition(leftforce, LeftDriveWheel.position);
-//    //m_Rigidbody.AddForceAtPosition(rightforce, RightDriveWheel.position);
-
-//}
-// Update is called once per frame
 

@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 public class TankHUD : MonoBehaviour
 {
     [Header("Refs")]
-    [SerializeField] private TankUIEvents m_Telemetry;
+    [SerializeField] private TankUIEvents m_UIEvents;
     [SerializeField] private TankWeapon m_Weapon;
 
     [Header("Placement")]
@@ -36,6 +36,8 @@ public class TankHUD : MonoBehaviour
     [SerializeField] private float m_SegmentHeight = 10f;
     [SerializeField] private float m_SegmentGap = 4f;
 
+    [SerializeField] private float m_SlipGap = 10f; // space between slip box and weapon box
+
     private VisualElement m_Root;
 
     private VisualElement m_LeftCard;
@@ -44,6 +46,9 @@ public class TankHUD : MonoBehaviour
     private Label m_DirectionLine;
     private Label m_HeadingLine;
     private Label m_ReverseBadge;
+
+    private VisualElement m_SlipCard;
+    private Label m_SlipLabel;
 
     private VisualElement m_RightCard;
     private Label m_WeaponTitle;
@@ -238,30 +243,79 @@ public class TankHUD : MonoBehaviour
 
     private void HookEvents()
     {
-        if (m_Telemetry == null) return;
+        if (m_UIEvents == null) return;
 
-        m_Telemetry.SpeedChanged += OnSpeedChanged;
-        m_Telemetry.DirectionChanged += OnDirectionChanged;
-        m_Telemetry.HeadingChanged += OnHeadingChanged;
-        m_Telemetry.GunElevationChanged += OnGunElevationChanged;
+        m_UIEvents.SpeedChanged += OnSpeedChanged;
+        m_UIEvents.DirectionChanged += OnDirectionChanged;
+        m_UIEvents.HeadingChanged += OnHeadingChanged;
+        m_UIEvents.GunElevationChanged += OnGunElevationChanged;
 
-        m_Telemetry.WeaponReadyChanged += OnWeaponReadyChanged;
-        m_Telemetry.WeaponFired += OnWeaponFired;
+        m_UIEvents.WeaponReadyChanged += OnWeaponReadyChanged;
+        m_UIEvents.WeaponFired += OnWeaponFired;
+        m_UIEvents.SlippingChanged += OnSlippingChanged;
+
     }
 
     private void UnhookEvents()
     {
-        if (m_Telemetry == null) return;
+        if (m_UIEvents == null) return;
 
-        m_Telemetry.SpeedChanged -= OnSpeedChanged;
-        m_Telemetry.DirectionChanged -= OnDirectionChanged;
-        m_Telemetry.HeadingChanged -= OnHeadingChanged;
-        m_Telemetry.GunElevationChanged -= OnGunElevationChanged;
+        m_UIEvents.SpeedChanged -= OnSpeedChanged;
+        m_UIEvents.DirectionChanged -= OnDirectionChanged;
+        m_UIEvents.HeadingChanged -= OnHeadingChanged;
+        m_UIEvents.GunElevationChanged -= OnGunElevationChanged;
 
-        m_Telemetry.WeaponReadyChanged -= OnWeaponReadyChanged;
-        m_Telemetry.WeaponFired -= OnWeaponFired;
+        m_UIEvents.WeaponReadyChanged -= OnWeaponReadyChanged;
+        m_UIEvents.WeaponFired -= OnWeaponFired;
+        m_UIEvents.SlippingChanged -= OnSlippingChanged;
+
     }
 
+    private void OnSlippingChanged(bool slipping)
+    {
+        if (slipping)
+        {
+            if (m_SlipCard != null) return;
+
+            m_SlipCard = MakeCard();
+            ApplyCardSizing(m_SlipCard);
+
+            m_SlipCard.style.right = m_Margin;
+            m_SlipCard.style.bottom = m_Margin + (110 * m_UIScale); // push it above weapon card (tweak)
+            m_SlipCard.style.borderLeftColor = new Color(1.0f, 0.55f, 0.10f, 1f);
+
+            m_SlipLabel = new Label("SLIPPING");
+            m_SlipLabel.style.fontSize = Mathf.RoundToInt(18 * m_UIScale);
+            m_SlipLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            m_SlipLabel.style.color = Color.white;
+
+            m_SlipCard.Add(m_SlipLabel);
+            m_Root.Add(m_SlipCard);
+
+            PositionSlipCardAboveWeapon();
+
+            // then position again next frame after layout resolves. [web:390][web:427]
+            m_Root.schedule.Execute(PositionSlipCardAboveWeapon);
+        }
+        else
+        {
+            if (m_SlipCard == null) return;
+            m_SlipCard.RemoveFromHierarchy();
+            m_SlipCard = null;
+            m_SlipLabel = null;
+        }
+    }
+
+    private void PositionSlipCardAboveWeapon()
+    {
+        if (m_SlipCard == null || m_RightCard == null) return;
+
+        float weaponH = m_RightCard.resolvedStyle.height; // final layout height [web:427]
+        if (weaponH <= 0.1f || float.IsNaN(weaponH)) return;
+
+        m_SlipCard.style.right = m_Margin;
+        m_SlipCard.style.bottom = m_Margin + weaponH + (m_SlipGap * m_UIScale);
+    }
     private void OnSpeedChanged(float speed) => SetSpeed(speed);
     private void OnDirectionChanged(TankUIEvents.MoveDir dir) => SetDirection(dir);
     private void OnHeadingChanged(float headingDeg) => SetHeading(headingDeg);

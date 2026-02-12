@@ -2271,6 +2271,19 @@ MonoBehaviour:
   m_LateralFrictionPerSecond: 8
   m_MaxYawDegPerSec: 120
   m_MaxForcePerTrack: 1200
+  m_GroundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_HoldMaxAngleDeg: 18
+  m_HoldSpeedThreshold: 0.25
+  m_HoldStrength: 1
+  m_SlipMaxAngleDeg: 40
+  m_SlipAssist: 0.35
+  m_NoSlipAngleDeg: 21
+  m_MinGroundedRatio: 0.8
+  m_SlipUiMinDownhillSpeed: 0.35
+  m_SlipUiOnDelay: 0.25
+  m_SlipUiOffDelay: 0.35
   m_TurnSpeedDegPerSec: 90
   m_TurnAtHighSpeed: 0.4
   m_AllowPivotTurn: 1
@@ -2297,7 +2310,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Muzzle: {fileID: 1602318925}
   m_ProjectilePrefab: {fileID: 5999719510215838405, guid: 46ef1a511f152e445bba4a5aa2496bbe, type: 3}
-  m_MuzzleVelocity: 60
+  m_MuzzleVelocity: 47
   m_FireCooldown: 0.5
 --- !u!114 &928874469
 MonoBehaviour:
@@ -2335,6 +2348,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Weapon: {fileID: 928874468}
+  m_Movement: {fileID: 928874467}
   m_Turret: {fileID: 1013742092}
   m_Barrel: {fileID: 357494962}
   m_SpeedEpsilon: 0.05
@@ -3627,7 +3641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0106d801a1d634d4ea731c669fe07db2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Telemetry: {fileID: 928874470}
+  m_UIEvents: {fileID: 928874470}
   m_Weapon: {fileID: 928874468}
   m_Margin: 12
   m_UIScale: 1.25
@@ -3644,6 +3658,7 @@ MonoBehaviour:
   m_SegmentWidth: 18
   m_SegmentHeight: 10
   m_SegmentGap: 4
+  m_SlipGap: 10
 --- !u!114 &1571218298
 MonoBehaviour:
   m_ObjectHideFlags: 0
