@@ -1,5 +1,12 @@
 using UnityEngine;
 
+
+/// <summary>
+///  Main Camera for tank orbit 
+/// - Applies look input to yaw/pitch a pivot (pitch clamped)
+/// - Positions the camera behind the pivot at a default distance
+/// - Uses a sphere cast to stop the camera clipping through level geometry
+/// </summary>
 public class TankCameraOrbit : MonoBehaviour
 {
     [Header("References")]
@@ -13,7 +20,9 @@ public class TankCameraOrbit : MonoBehaviour
 
     [Header("Distance / Offset")]
     [SerializeField] private float m_DefaultDistance = 6f;
-    [SerializeField] private float m_LocalHeight = 0f; // set pivot height in the pivot transform, or use this offset
+
+    //Done for Personal tweaking , but if i place correctly in scene then I do not need to touch this but nice to have for testing 
+    [SerializeField] private float m_LocalHeight = 0f; 
 
     [Header("Collision")]
     [SerializeField] private float m_CollisionRadius = 0.3f;
@@ -25,29 +34,36 @@ public class TankCameraOrbit : MonoBehaviour
 
     public Transform CameraTransform => m_Camera;
 
-    public void SetLookInput(Vector2 look)
+   
+    public void SetLookInput(Vector2 mouseLook)
     {
-        m_LookInput = look;
+        m_LookInput = mouseLook;
     }
 
+    // Late update used to keep the camera reacting after the movment scripts have run this frame 
     private void LateUpdate()
     {
         if (m_Camera == null || m_SpringArmPivot == null)
+        {
             return;
+        }
 
-        UpdateOrbit(Time.deltaTime);
+        UpdateCameraOrbit(Time.deltaTime);
         ResolveCollision();
     }
 
-    private void UpdateOrbit(float dt)
+    private void UpdateCameraOrbit(float TimeSinceLastUpdate)
     {
-        m_Yaw += m_LookInput.x * m_Sensitivity * dt;
-        m_Pitch -= m_LookInput.y * m_Sensitivity * dt;
+        m_Yaw += m_LookInput.x * m_Sensitivity * TimeSinceLastUpdate;
+        m_Pitch -= m_LookInput.y * m_Sensitivity * TimeSinceLastUpdate;
+
+        //I clamp the pitch to avoid some weird flipping thta occurs 
         m_Pitch = Mathf.Clamp(m_Pitch, m_MinPitch, m_MaxPitch);
 
         m_SpringArmPivot.rotation = Quaternion.Euler(m_Pitch, m_Yaw, 0f);
     }
 
+    // Sphere casts from the pivot to the desired camera point and pulls the camera in if obstructed
     private void ResolveCollision()
     {
         Vector3 desiredLocalPos = new Vector3(0f, m_LocalHeight, -m_DefaultDistance);
@@ -56,16 +72,20 @@ public class TankCameraOrbit : MonoBehaviour
         Vector3 desiredWorldPos = m_SpringArmPivot.TransformPoint(desiredLocalPos);
 
         Vector3 delta = desiredWorldPos - pivot;
-        float dist = delta.magnitude;
-        if (dist < 0.0001f)
-            return;
+        float distance = delta.magnitude;
 
-        Vector3 dir = delta / dist;
-
-        if (Physics.SphereCast(pivot, m_CollisionRadius, dir, out RaycastHit hit, dist, m_CollisionMask, QueryTriggerInteraction.Ignore))
+        if (distance < 0.0001f)
         {
+            return;
+        }
+
+        Vector3 direction = delta / distance;
+
+        if (Physics.SphereCast(pivot, m_CollisionRadius, direction, out RaycastHit hit, distance, m_CollisionMask, QueryTriggerInteraction.Ignore))
+        {
+            // safeDist ensures the camera is never fully on the surface by subtracting the cast radius 
             float safeDist = Mathf.Max(0f, hit.distance - m_CollisionRadius);
-            m_Camera.position = pivot + dir * safeDist;
+            m_Camera.position = pivot + direction * safeDist;
         }
         else
         {

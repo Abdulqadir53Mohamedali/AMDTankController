@@ -3655,7 +3655,7 @@ MonoBehaviour:
   m_WeaponReady: {r: 0.2, g: 0.9, b: 0.25, a: 1}
   m_WeaponReload: {r: 0.95, g: 0.7882353, b: 0.1, a: 1}
   m_SegmentCount: 10
-  m_SegmentWidth: 18
+  m_SegmentWidth: 35
   m_SegmentHeight: 10
   m_SegmentGap: 4
   m_SlipGap: 10

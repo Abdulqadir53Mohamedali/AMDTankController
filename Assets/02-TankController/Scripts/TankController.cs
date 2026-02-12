@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,28 +11,30 @@ public class TankController : MonoBehaviour
 
     private Vector2 m_Look;
 
-    private float throttle = 0f;
-    private float steer = 0f;
+    private float m_Throttle = 0f;
+    private float m_Steer = 0f;
     private void Awake()
 	{
 		m_ActionMap = new AM_02Tank();
 		m_Movement = GetComponent<TankMovement>();
-        m_CameraOrbit = GetComponent<TankCameraOrbit>();   // optional but recommended on same GameObject
+        m_CameraOrbit = GetComponent<TankCameraOrbit>(); 
         m_Weapon = GetComponent<TankWeapon>();
     }
     void Update()
     {
-        m_Movement.SetInput(throttle, steer);
+        m_Movement.SetInput(m_Throttle, m_Steer);
 
 
-        // Movement input always goes into TankMovement
         if (m_Movement != null)
-            m_Movement.SetInput(throttle, steer);
+		{
+            m_Movement.SetInput(m_Throttle, m_Steer);
+        }
 
-        // Look input goes into camera orbit (orbit runs in LateUpdate in that script)
+        // look/mouse input is then taken in by the camera orbit (orbit runs in LateUpdate in that script)
         if (m_CameraOrbit != null)
+		{
             m_CameraOrbit.SetLookInput(m_Look);
-        //Debug.Log($"Input throttle={throttle:F2} steer={steer:F2}");
+        }
 
     }
     private void OnEnable()
@@ -69,28 +70,30 @@ public class TankController : MonoBehaviour
 
 	private void Handle_AcceleratePerformed(InputAction.CallbackContext context)
 	{
-		throttle = context.ReadValue<float>();
+		m_Throttle = context.ReadValue<float>();
 	}
 
 	private void Handle_AccelerateCanceled(InputAction.CallbackContext context)
 	{
-		throttle = 0.0f;
+		m_Throttle = 0.0f;
 	}
 
 	private void Handle_SteerPerformed(InputAction.CallbackContext context)
 	{
-		steer = context.ReadValue<float>();
+		m_Steer = context.ReadValue<float>();
 	}
 
 	private void Handle_SteerCanceled(InputAction.CallbackContext context)
 	{
-		steer = 0.0f;
+		m_Steer = 0.0f;
 	}
 
     private void Handle_FirePerformed(InputAction.CallbackContext context)
     {
         if (m_Weapon != null)
+		{
             m_Weapon.TryFire();
+        }
     }
 
 

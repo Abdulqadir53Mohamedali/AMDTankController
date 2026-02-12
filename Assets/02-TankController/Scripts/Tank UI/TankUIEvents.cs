@@ -2,6 +2,16 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
+/// <summary>
+/// Event "bridge" between gameplay systems and the HUD
+/// Polls tank state each frame and only raises events when values change beyond small thresholds
+/// (to reduce UI spam and unnecessary updates)
+/// - Speed + movement direction from Rigidbody velocity
+/// - Heading from transform yaw
+/// - Gun elevation from barrel orientation relative to turret
+/// - Slipping state from TankMovement
+/// Also forwards weapon events (ready state changes + fired)
+/// </summary>
 public class TankUIEvents: MonoBehaviour
 {
     public enum MoveDir { Idle, Forward, Reverse }
@@ -24,7 +34,8 @@ public class TankUIEvents: MonoBehaviour
     public event Action<MoveDir> DirectionChanged;
     public event Action<float> HeadingChanged;
 
-    public event Action<float> GunElevationChanged; // degrees (+ up, - down)
+    // degrees (+ up, - down)
+    public event Action<float> GunElevationChanged; 
 
     public event Action<bool> SlippingChanged;
 
@@ -33,6 +44,7 @@ public class TankUIEvents: MonoBehaviour
 
     private Rigidbody m_Rb;
 
+    // Cached last values so we can publish only on change (with epsilons)
     private float m_LastSpeed = float.NaN;
     private float m_LastHeading = float.NaN;
     private float m_LastElevation = float.NaN;
@@ -47,6 +59,7 @@ public class TankUIEvents: MonoBehaviour
 
     private void OnEnable()
     {
+        // Forward weapon events instead of the HUD needing to subscribe to the weapon directly
         if (m_Weapon != null)
         {
             m_Weapon.ReadyStateChanged += HandleWeaponReadyChanged;
@@ -73,9 +86,13 @@ public class TankUIEvents: MonoBehaviour
     }
     private void PublishSlipping()
     {
-        if (m_Movement == null) return;
+        if (m_Movement == null)
+        {
+            return;
+        }
 
         bool slip = m_Movement.IsSlipping;
+
         if (slip != m_LastSlip)
         {
             m_LastSlip = slip;
@@ -87,11 +104,12 @@ public class TankUIEvents: MonoBehaviour
         Vector3 v = m_Rb.linearVelocity;
 
         float speed = v.magnitude;
+
+        // Signed speed along tank forward axis (used to decide forward/reverse/idle)
         float forwardSpeed = Vector3.Dot(v, transform.forward);
 
-        MoveDir dir =
-            Mathf.Abs(forwardSpeed) < 0.05f ? MoveDir.Idle :
-            (forwardSpeed > 0f ? MoveDir.Forward : MoveDir.Reverse);
+        // Speed is noisy, so only publish if it changes more than an epsilon
+        MoveDir dir =  Mathf.Abs(forwardSpeed) < 0.05f ? MoveDir.Idle : (forwardSpeed > 0f ? MoveDir.Forward : MoveDir.Reverse);
 
         if (float.IsNaN(m_LastSpeed) || Mathf.Abs(speed - m_LastSpeed) > m_SpeedEpsilon)
         {
@@ -108,7 +126,8 @@ public class TankUIEvents: MonoBehaviour
 
     private void PublishHeading()
     {
-        float heading = transform.eulerAngles.y; // 0..360
+        // Euler yaw is 0-360, the DeltaAngle handles wrap-around cleanly
+        float heading = transform.eulerAngles.y; 
 
         if (float.IsNaN(m_LastHeading) || Mathf.Abs(Mathf.DeltaAngle(m_LastHeading, heading)) > m_HeadingEpsilon)
         {
@@ -120,13 +139,15 @@ public class TankUIEvents: MonoBehaviour
     private void PublishGunElevation()
     {
         if (m_Turret == null || m_Barrel == null)
+        {
             return;
+        }
 
-        // Convert barrel forward into turret-local space. [web:420]
-        Vector3 localBarrelForward = m_Turret.InverseTransformDirection(m_Barrel.forward); // [web:420]
+        // Convert barrel forward into turretlocal space , so  the up/down is relative to the turret
+        Vector3 localBarrelForward = m_Turret.InverseTransformDirection(m_Barrel.forward); 
         localBarrelForward.Normalize();
 
-        // Pitch/elevation in degrees: + up, - down.
+        // Pitch/elevation in degrees: + up, - down
         float elevationDeg = Mathf.Asin(Mathf.Clamp(localBarrelForward.y, -1f, 1f)) * Mathf.Rad2Deg;
 
         if (float.IsNaN(m_LastElevation) || Mathf.Abs(elevationDeg - m_LastElevation) > m_ElevationEpsilon)

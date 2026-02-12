@@ -1,9 +1,14 @@
-using Codice.Client.Common.GameUI;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using System;
 
-
+/// <summary>
+/// Physics based tank movement controller
+/// - Converts throttle into a target forward speed and applies drive force through both tracks (scaled by traction)
+/// - Uses differential steering (MoveRotation) with speed/traction scaling, plus yaw/pitch/roll damping for stability
+/// - Applies lateral friction to reduce sideways sliding (scaled by traction)
+/// - Adds "slope grip" logic: no-slip on gentle slopes, reduced sliding on steeper slopes
+/// - Detects sustained downhill sliding ("slipping") for UI feedback with debounce (on/off delays)
+/// </summary>
 public class TankMovement : MonoBehaviour
 {
 
@@ -19,27 +24,25 @@ public class TankMovement : MonoBehaviour
     [SerializeField] private TankTrack m_LeftTrack;
     [SerializeField] private TankTrack m_RightTrack;
 
-    [SerializeField] private float m_LateralFriction = 0.85f;   // 0 = no kill, 1 = strong kill
-    [SerializeField] private float m_LateralFrictionPerSecond = 8f; // try 6–15
-    [SerializeField] private float m_MaxYawDegPerSec = 120f; // try 90–180
-    [SerializeField] private float m_MaxForcePerTrack = 1200f; // start near your current feel
+    [SerializeField] private float m_LateralFrictionPerSecond = 8f; 
+    [SerializeField] private float m_MaxYawDegPerSec = 120f; 
+    [SerializeField] private float m_MaxForcePerTrack = 1200f; 
 
 
     [Header("Slope Grip")]
     [SerializeField] private LayerMask m_GroundMask = ~0;
 
-    [SerializeField] private float m_HoldMaxAngleDeg = 18f;        // <= THIS is your “start slipping angle”
-    [SerializeField] private float m_HoldSpeedThreshold = 0.25f;   // only hold when nearly stopped
-    [SerializeField, Range(0f, 1f)] private float m_HoldStrength = 1.0f; // 1 = fully cancels downhill accel
-
+    // Above this angle, sliding is allowed (and can optionally reduce it using m_SlipAssist)
+    [SerializeField] private float m_HoldMaxAngleDeg = 18f;       
+    
     [SerializeField] private float m_SlipMaxAngleDeg = 40f;        // above this, tank will slide (more)
     [SerializeField, Range(0f, 1f)] private float m_SlipAssist = 0.35f;  // 0 = pure physics slide, 1 = strong assist
 
-    [SerializeField] private float m_NoSlipAngleDeg = 8f;      // <= gentle ramps: never creep
-    [SerializeField] private float m_MinGroundedRatio = 0.8f;  // require most arms grounded
+    // When slopeAngle <= this, tank should not creep downhill at all
+    [SerializeField] private float m_NoSlipAngleDeg = 8f;      
 
     [Header("Slip Detect (for UI)")]
-    [SerializeField] private float m_SlipUiMinDownhillSpeed = 0.35f; // m/s needed before we call it slipping
+    [SerializeField] private float m_SlipUiMinDownhillSpeed = 0.35f; // m/s needed before we can call it slipping
     [SerializeField] private float m_SlipUiOnDelay = 0.25f;          // seconds sustained
     [SerializeField] private float m_SlipUiOffDelay = 0.35f;
 
@@ -47,37 +50,27 @@ public class TankMovement : MonoBehaviour
     public float LastSlopeAngleDeg { get; private set; }
     private float m_SlipTimer;
 
+    private Rigidbody m_Rigidbody;
 
 
     [Header("Steering (MoveRotation)")]
-    [SerializeField] private float m_TurnSpeedDegPerSec = 90f;     // try 60–140
-    [SerializeField] private float m_TurnAtHighSpeed = 0.4f;       // like your friend
+    [SerializeField] private float m_TurnSpeedDegPerSec = 90f;    
+    [SerializeField] private float m_TurnAtHighSpeed = 0.4f;       
     [SerializeField] private bool m_AllowPivotTurn = true;
-    private Rigidbody m_Rigidbody;
-    [Header("Base Drive Values")]
-    [SerializeField] private float m_maxTrackForce;
-    [SerializeField] private float m_maxSpeed;
-    [SerializeField] private float m_Speed;
+
 
     [Header("Tuning")]
     [SerializeField] private float m_Acceleration = 8f;
-    [SerializeField] private float m_TurnSharpness = 1.0f;     // how strong differential steering is
-
-    // The multipliers at high and low speed 
-    [SerializeField] private float m_SteerAtLowSpeed = 1.0f;   
-    [SerializeField] private float m_SteerAtHighSpeed = 0.4f;
-
-    [SerializeField] private float m_TurnDrag = 2.5f;   // tweak 1–5
-
-    [SerializeField] private float m_CoastingDrag = 0.5f;  // try 0.5–1.5
+    [SerializeField] private float m_TurnDrag = 2.5f;  
+    [SerializeField] private float m_CoastingDrag = 0.5f;  
 
     private float m_Throttle = 0f;
     private float m_Steer = 0f;
 
+    // Smoothed speed target so acceleration feels controlled rather than instantly snapping
     private float m_TargetSpeed;
 
     public float CurrentSpeed => Vector3.Dot(m_Rigidbody.linearVelocity, transform.forward);
-    //public static event Action<Vector3,Vector3> onDriveWheelRaycast;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -110,38 +103,49 @@ public class TankMovement : MonoBehaviour
         }
 
         UpdateDrive();
-        ApplySteeringMoveRotation();   // NEW
+        ApplySteeringMoveRotation();   
 
         ApplySideFriction();
         ApplyForwardDrag();
         ApplyPitchRollDamping();
-        ApplyTurnDamping();        // NEW
+        ApplyTurnDamping();       
         LimitYawRate();
         ApplySlopeGripAssist();
+
+        // Clamp last so no other step pushes speed beyond max afterwards
         LimitForwardSpeed();
     }
     private void ApplySlopeGripAssist()
     {
-        // Only assist when player isn't asking to move
-        if (Mathf.Abs(m_Throttle) > 0.05f) { UpdateSlipState(false); return; }
+        // If player is actively driving, slipping is false (so UI doesn’t stick on)
+        if (Mathf.Abs(m_Throttle) > 0.05f) 
+        { 
+            UpdateSlipState(false); return;
+        }
 
-        // Need decent contact, otherwise you get “air brakes”
+        // Traction is used as a "ground contact confidence" here
         float traction = (m_LeftTrack.TractionFactor + m_RightTrack.TractionFactor) * 0.5f;
-        if (traction < 0.5f) return;
+        if (traction < 0.5f)
+        {
+            return;
+        }
 
-        // Raycast down to find the supporting surface normal. [web:492]
+        // Raycast down to find the ground normal underneath the tank
         Vector3 origin = m_Rigidbody.worldCenterOfMass;
         if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 3.0f, m_GroundMask, QueryTriggerInteraction.Ignore))
-            return; // [web:492]
+        {
+            return;
 
-        // Slope angle from the ground normal. [web:504]
-        float slopeAngle = Vector3.Angle(hit.normal, Vector3.up); // [web:504]
+        }
 
-        // Gravity component along the slope plane. [web:496][web:481]
-        Vector3 gravity = Physics.gravity; // [web:496]
-        Vector3 gravityAlongSlope = Vector3.ProjectOnPlane(gravity, hit.normal); // [web:481]
+        // Angle between the ground normal and "up", 0 = flat ground, higher = steeper slope
+        float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
 
-        // If gravity is basically perpendicular to the plane, nothing to do.
+        // Project gravity onto the slope plane to get the downhill acceleration direction / magnitude
+        Vector3 gravity = Physics.gravity;
+        Vector3 gravityAlongSlope = Vector3.ProjectOnPlane(gravity, hit.normal);
+
+        // Flat ground leads to no downhill component
         if (gravityAlongSlope.sqrMagnitude < 0.0001f) 
         {
             UpdateSlipState(false);
@@ -150,102 +154,114 @@ public class TankMovement : MonoBehaviour
         LastSlopeAngleDeg = slopeAngle;
 
 
-        Vector3 slopeDownDir = gravityAlongSlope.normalized; // [web:557]
-        float downhillSpeed = Vector3.Dot(m_Rigidbody.linearVelocity, slopeDownDir); // [web:552]
+        Vector3 slopeDownDir = gravityAlongSlope.normalized;
 
-        bool slippingNow =
-            slopeAngle > m_HoldMaxAngleDeg &&
-            downhillSpeed > m_SlipUiMinDownhillSpeed;
+        // Positive when moving downhill, negative when moving uphill.
+        float downhillSpeed = Vector3.Dot(m_Rigidbody.linearVelocity, slopeDownDir); 
 
-        // If you're in the "no slip" zone, never show slipping UI
-        if (slopeAngle <= m_NoSlipAngleDeg)
-            slippingNow = false;
+        bool slippingNow =   slopeAngle > m_HoldMaxAngleDeg &&  downhillSpeed > m_SlipUiMinDownhillSpeed;
 
-        UpdateSlipState(slippingNow);
-        // 1) Near-flat / mild slopes: “hill hold”
+        // Never show slipping UI in the no slip zone
         if (slopeAngle <= m_NoSlipAngleDeg)
         {
-            // Cancel gravity along slope fully (no traction scaling). [web:503][web:531]
-            m_Rigidbody.AddForce(-gravityAlongSlope, ForceMode.Acceleration); // [web:503][web:531]
+            slippingNow = false;
+        }
 
-            // Remove along-slope velocity so it cannot accumulate. [web:525]
+        UpdateSlipState(slippingNow);
+
+        if (slopeAngle <= m_NoSlipAngleDeg)
+        {
+            m_Rigidbody.AddForce(-gravityAlongSlope, ForceMode.Acceleration); 
+
+            // Remove along slope velocity so it cannot accumulate, canceling downhill acceleration
             Vector3 downDir = gravityAlongSlope.normalized;
-            Vector3 v = m_Rigidbody.linearVelocity; // [web:525]
+            Vector3 v = m_Rigidbody.linearVelocity; 
             float along = Vector3.Dot(v, downDir);
-            m_Rigidbody.linearVelocity = v - downDir * along; // [web:525]
+            m_Rigidbody.linearVelocity = v - downDir * along; 
             return;
         }
 
 
-        // 2) Steeper slopes: allow sliding, but optionally reduce it (tank has “grip”)
-        // Blend assist between hold angle and slip max angle.
+        // Steeper slopes allow sliding
+        // Blend assist between hold angle and slip max angle
         float t = Mathf.InverseLerp(m_HoldMaxAngleDeg, m_SlipMaxAngleDeg, slopeAngle);
         float assist = Mathf.Lerp(0f, m_SlipAssist, t);
 
-        m_Rigidbody.AddForce(-gravityAlongSlope * assist * traction, ForceMode.Acceleration); // [web:503][web:505]
+        m_Rigidbody.AddForce(-gravityAlongSlope * assist * traction, ForceMode.Acceleration); 
     }
 
     private void UpdateSlipState(bool slippingNow)
     {
         if (slippingNow)
         {
-            m_SlipTimer = Mathf.Min(m_SlipUiOnDelay, m_SlipTimer + Time.fixedDeltaTime); // [web:559]
-            if (m_SlipTimer >= m_SlipUiOnDelay) IsSlipping = true;
+            m_SlipTimer = Mathf.Min(m_SlipUiOnDelay, m_SlipTimer + Time.fixedDeltaTime); 
+            if (m_SlipTimer >= m_SlipUiOnDelay)
+            {
+                IsSlipping = true;
+            }
         }
         else
         {
-            m_SlipTimer = Mathf.Max(-m_SlipUiOffDelay, m_SlipTimer - Time.fixedDeltaTime); // [web:559]
-            if (m_SlipTimer <= -m_SlipUiOffDelay) IsSlipping = false;
+            m_SlipTimer = Mathf.Max(-m_SlipUiOffDelay, m_SlipTimer - Time.fixedDeltaTime); 
+            if (m_SlipTimer <= -m_SlipUiOffDelay)
+            {
+                IsSlipping = false;
+            }
         }
     }
     private void LimitYawRate()
     {
+        // Clamp only the yaw component of angular velocity while leaving pitch / roll unchnaged
         float maxYawRad = m_MaxYawDegPerSec * Mathf.Deg2Rad;
 
         Vector3 angVel = m_Rigidbody.angularVelocity;
         float yaw = Vector3.Dot(angVel, Vector3.up);
         yaw = Mathf.Clamp(yaw, -maxYawRad, maxYawRad);
 
-        // keep pitch/roll unchanged
         Vector3 pr = angVel - Vector3.up * Vector3.Dot(angVel, Vector3.up);
         m_Rigidbody.angularVelocity = pr + Vector3.up * yaw;
     }
     private void ApplyPitchRollDamping()
     {
         // Only when not actively accelerating (so it doesn't feel like glue while driving)
-        if (Mathf.Abs(m_Throttle) > 0.05f) return;
+        if (Mathf.Abs(m_Throttle) > 0.05f)
+        {
+            return;
+        }
 
         Vector3 angVel = m_Rigidbody.angularVelocity;
 
-        // Remove pitch (around tank right) and roll (around tank forward)
         Vector3 right = transform.right;
         Vector3 forward = transform.forward;
 
         float pitch = Vector3.Dot(angVel, right);
         float roll = Vector3.Dot(angVel, forward);
 
+        // Exponential decay gives stable damping independent-ish of framerate
         float decay = Mathf.Exp(-m_PitchRollDamping * Time.fixedDeltaTime);
 
         pitch *= decay;
         roll *= decay;
 
-        // Rebuild angular velocity: keep yaw as-is, damp pitch/roll
+        // Rebuild the angular velocity
         Vector3 yawComponent = Vector3.Project(angVel, Vector3.up);
         m_Rigidbody.angularVelocity = yawComponent + right * pitch + forward * roll;
     }
     private void ApplyTurnDamping()
     {
-        // only when you're not actively steering
-        if (Mathf.Abs(m_Steer) > 0.05f && Mathf.Abs(m_Throttle) > 0.05f) return;
+        // Only when not actively steering (and usually when not throttling)
+        if (Mathf.Abs(m_Steer) > 0.05f && Mathf.Abs(m_Throttle) > 0.05f)
+        {
+            return;
+        }
 
 
         Vector3 angVel = m_Rigidbody.angularVelocity;
-        // kill yaw (around global up)
+
         float yaw = Vector3.Dot(angVel, Vector3.up);
         float decay = Mathf.Exp(-m_TurnDrag * Time.fixedDeltaTime);
         yaw *= decay;
 
-        // rebuild angular velocity with damped yaw
         Vector3 lateral = angVel - Vector3.up * yaw;
         m_Rigidbody.angularVelocity = lateral + Vector3.up * yaw;
     }
@@ -254,9 +270,10 @@ public class TankMovement : MonoBehaviour
         float currentForward = Vector3.Dot(m_Rigidbody.linearVelocity, transform.forward);
         float desiredSpeed = m_Throttle * m_Config.maxSpeed;
 
+        // Convert input (-1 - 1) into desired speed, then smoothed using MoveTowards
         m_TargetSpeed = Mathf.MoveTowards(m_TargetSpeed, desiredSpeed, m_Acceleration * Time.fixedDeltaTime);
-        float speedDelta = m_TargetSpeed - currentForward;
 
+        float speedDelta = m_TargetSpeed - currentForward;
         Vector3 driveForce = transform.forward * (speedDelta * m_Config.maxTrackForce);
 
         ApplyForceToTrack(m_LeftTrack, driveForce);
@@ -265,36 +282,42 @@ public class TankMovement : MonoBehaviour
 
     private void ApplySideFriction()
     {
-        // If both tracks are almost airborne, don't touch velocity.
+        // Skip if both tracks are essentially airborne
         float avgTraction = (m_LeftTrack.TractionFactor + m_RightTrack.TractionFactor) * 0.5f;
         if (avgTraction < 0.05f)
+        {
             return;
+        }
 
-        // Convert current velocity into the tank's local space.
+        // Convert current velocity into the tank's local space
         Vector3 localVel = transform.InverseTransformDirection(m_Rigidbody.linearVelocity);
 
-        // x = sideways, z = forward in tank local space.
+        // x = sideways, z = forward in tank local space
         float k = Mathf.Exp(-m_LateralFrictionPerSecond * avgTraction * Time.fixedDeltaTime);
         localVel.x *= k;
 
-        // Convert back to world space.
+        // Convert back to world space
         m_Rigidbody.linearVelocity = transform.TransformDirection(localVel);
     }
     private void ApplySteeringMoveRotation()
     {
-        // If you don't allow pivot turns, require some throttle like your friend's script does.
+        // If pivot turns are disabled, require some throttle to rotate
         if (!m_AllowPivotTurn && Mathf.Abs(m_Throttle) < 0.05f)
+        {
             return;
+        }
 
-        // Optional: also reduce steering if traction is low (prevents spinning in air)
         float traction = (m_LeftTrack.TractionFactor + m_RightTrack.TractionFactor) * 0.5f;
         if (traction < 0.05f)
+        {
             return;
+        }
 
         float forwardSpeed = Mathf.Abs(Vector3.Dot(m_Rigidbody.linearVelocity, transform.forward));
-        float speed01 = Mathf.InverseLerp(0f, m_Config.maxSpeed, forwardSpeed);
+        float speed = Mathf.InverseLerp(0f, m_Config.maxSpeed, forwardSpeed);
 
-        float steeringScale = Mathf.Lerp(1f, m_TurnAtHighSpeed, speed01);
+        // Reduces turn rate at high speed 
+        float steeringScale = Mathf.Lerp(1f, m_TurnAtHighSpeed, speed);
 
         float turnDeg = m_Steer * m_TurnSpeedDegPerSec * steeringScale * traction * Time.fixedDeltaTime;
 
@@ -304,9 +327,10 @@ public class TankMovement : MonoBehaviour
 
     private void ApplyForwardDrag()
     {
-        // when no throttle, gently slow forward velocity
         if (Mathf.Abs(m_Throttle) > 0.05f)
+        {
             return;
+        }
 
         Vector3 vel = m_Rigidbody.linearVelocity;
         Vector3 forward = transform.forward;
@@ -314,7 +338,7 @@ public class TankMovement : MonoBehaviour
         float forwardSpeed = Vector3.Dot(vel, forward);
         Vector3 lateral = vel - forward * forwardSpeed;
 
-        // exponential decay towards zero
+        // Only damp forward/back (keep lateral, gravity and suspension behaviour intact)
         float drag = Mathf.Exp(-m_CoastingDrag * Time.fixedDeltaTime);
         forwardSpeed *= drag;
 
@@ -336,10 +360,8 @@ public class TankMovement : MonoBehaviour
         }
 
 
-        // Scale by traction
+        // Scale by traction first, then cap so one frame can’t inject a huge force spike
         Vector3 total = totalForce * traction;
-
-        // Cap the magnitude so one frame can’t inject a huge force spike
         total = Vector3.ClampMagnitude(total, m_MaxForcePerTrack);
 
         Vector3 forcePerPoint = total / drivePoints.Count;
@@ -348,14 +370,6 @@ public class TankMovement : MonoBehaviour
         {
             m_Rigidbody.AddForceAtPosition(forcePerPoint, point.position, ForceMode.Force);
         }
-        //// Scale by traction and mass so behaviour is mass independent-ish
-        //Vector3 TotalForce = totalForce * traction;
-        //Vector3 forcePerPoint = TotalForce / drivePoints.Count;
-
-        //foreach (var point in drivePoints)
-        //{
-        //    m_Rigidbody.AddForceAtPosition(forcePerPoint, point.position, ForceMode.Force);
-        //}
     }
 
     private void LimitForwardSpeed()
@@ -368,6 +382,7 @@ public class TankMovement : MonoBehaviour
             return;
         }
 
+        // Keep lateral velocity, clamp only forward axis
         Vector3 lateral = m_Rigidbody.linearVelocity - transform.forward * forward;
         float clampedForwardSpeed = Mathf.Clamp(forward, -max, max);
         m_Rigidbody.linearVelocity = transform.forward * clampedForwardSpeed + lateral;

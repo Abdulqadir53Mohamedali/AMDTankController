@@ -1,51 +1,48 @@
-using JetBrains.Annotations;
 using UnityEngine;
-using System;
-using UnityEditor;
 
 
+/// <summary>
+/// Per-wheel suspension arm for the tank
+/// - Raycasts down to find ground distance under this arm
+/// - Computes spring compression (restLength vs current spring length) and applies spring + damper force
+///   to the tank rigidbody at the contact point
+/// - Exposes grounded/compression values for traction and other systems
+/// - Moves the wheel mesh / transform to match the suspension length (visual only)
+/// </summary>
 public class TankSuspesnionArm : MonoBehaviour
 {
     [Header("Config")]
     [SerializeField] private TankConfig m_Config;
-    [SerializeField] private LayerMask m_GroundMask = ~0;   // what counts as ground
+    [SerializeField] private LayerMask m_GroundMask = ~0;   
 
 
     [Header("Visual")]
     [SerializeField] private float m_MaxWheelExtension = 0.35f;
     [SerializeField] private float m_WheelLerpSpeed = 12f;
-    
-    [SerializeField] private float m_MaxCompressionSpeed = 2.0f; // metres per second
-    private float m_CurrentCompression; // per arm
 
-    //[Header("Traction")]
-    //[SerializeField] private float m_LateralGrip = 8000f;           // try 6000–15000
-    //[SerializeField, Range(0f, 1f)] private float m_IdleGripScale = 0.2f; // grip when not loaded
-    //[SerializeField] private float m_SpeedGripBoost = 0.08f;
-    [SerializeField] private float m_MaxSuspensionForce = 150000f;//  dont worry in the insepctor thsi s chnaged ot be lower but 
+    // Limits how fast compression can change to avoid "teleporting" suspension on sudden terrain changes
+    [SerializeField] private float m_MaxCompressionSpeed = 2.0f;
+    // current compression for this arm (metres)
+    private float m_CurrentCompression; 
+
+    // Hard cap so forces can't explode if something goes wrong (or on extreme hits)
+    [SerializeField] private float m_MaxSuspensionForce = 500f;
 
     public bool IsGrounded { get; private set; }
-    public float NormalisedCompression { get; private set; }  // 0–1
 
-    private float m_LastHitDistance;  // for gizmos
+    // 0-1 compression amount used by traction / effects (0 = extended, 1 = fully compressed)
+    public float NormalisedCompression { get; private set; }
 
-
+    private float m_LastHitDistance;
     private float m_Comrpession;
-    
+
     private float m_ComrpessionSpeed;
+
+    // Wheel visual transform (child object that moves up/down)
     public Transform m_WheelPos;
-
-
-
 
     private Rigidbody m_Rigidbody;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-   
-    void Start()
-    {
-
-    }
     private void Awake()
     {
         m_Rigidbody = GetComponentInParent<Rigidbody>();
@@ -59,15 +56,6 @@ public class TankSuspesnionArm : MonoBehaviour
             // fall back to first child as wheel , in this instance it works becuase wheel is our only child
             m_WheelPos = transform.GetChild(0);
         }
-
-
-
-
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void FixedUpdate()
@@ -84,14 +72,17 @@ public class TankSuspesnionArm : MonoBehaviour
 
     private void ApplySuspension()
     {
+        // Max ray length = rest + max compression + wheel radius
+        // (wheelRadius is included so the ray can reach the ground even when the wheel is "below" the arm origin)
         float maxSuspensionLength = m_Config.restLength + m_Config.maxCompression + m_Config.wheelRadius;
-        Vector3 direction = -m_Rigidbody.transform.up; // stable reference
-        Vector3 origin = transform.position - direction * 0.10f; // lift origin 10cm "up" 
+        Vector3 direction = -m_Rigidbody.transform.up;
+        
+        // Slight offset to avoid starting the ray inside the ground/collider
+        Vector3 origin = transform.position - direction * 0.10f;
 
-
+        // No hit likely meaning airborne: reset compression info and extend wheel visually
         if (!Physics.Raycast(origin, direction, out RaycastHit hit, maxSuspensionLength, m_GroundMask, QueryTriggerInteraction.Ignore))
         {
-            // fully extended, airborne
             IsGrounded = false;
             NormalisedCompression = 0f;
             m_LastHitDistance = maxSuspensionLength;
@@ -102,10 +93,9 @@ public class TankSuspesnionArm : MonoBehaviour
         if (hit.collider != null)
         {
             var ar = hit.collider.attachedRigidbody;
-            Debug.Log($"[Arm:{name}] hit={hit.collider.name} layer={LayerMask.LayerToName(hit.collider.gameObject.layer)} " +
-                      $"attachedRb={(ar ? ar.name : "null")} sameRb={(ar == m_Rigidbody)} dist={hit.distance:F3}");
         }
 
+        // if the hit is extremely close, treat as invalid (prevents huge compression spikes / jitter)
         const float MinValidHitDist = 0.05f;
         if (hit.distance < MinValidHitDist)
         {
@@ -120,29 +110,25 @@ public class TankSuspesnionArm : MonoBehaviour
         IsGrounded = true;
         m_LastHitDistance = hit.distance;
 
-        // Compression: how much shorter than rest length
         float currentLength = hit.distance;
-        // Spring length should be measured to wheel centre, not to contact point.
+        
+        // Spring length should be measured to wheel centre, not to the contact point
         float springLen = Mathf.Max(0f, hit.distance - m_Config.wheelRadius);
 
-        // Compression: how much shorter than rest length (in metres)
+        // Target compression = how much shorter than rest length
         float targetCompression = Mathf.Clamp(m_Config.restLength - springLen, 0f, m_Config.maxCompression);
-        m_CurrentCompression = Mathf.MoveTowards(
-            m_CurrentCompression,
-            targetCompression,
-            m_MaxCompressionSpeed * Time.fixedDeltaTime
-        );
+
+        m_CurrentCompression = Mathf.MoveTowards( m_CurrentCompression, targetCompression, m_MaxCompressionSpeed * Time.fixedDeltaTime);
         float compression = m_CurrentCompression;
 
-        // Normalised for traction / effects
+        // Normalised for traction
         NormalisedCompression = m_Config.maxCompression > 0.0001f ? compression / m_Config.maxCompression : 0f;
 
-        // Spring + damper
         float springForceMag = m_Config.springStiffnes * compression;
 
-        Vector3 contactVelocity = m_Rigidbody.GetPointVelocity(hit.point);
 
-        // Damping along the suspension axis (arm up), not the surface normal.
+        // Damper force, oppose velocity along the suspension axis
+        Vector3 contactVelocity = m_Rigidbody.GetPointVelocity(hit.point);
         float suspensionSpeed = Vector3.Dot(contactVelocity, transform.up);
         float dampForceMag = -m_Config.damperStrength * suspensionSpeed;
 
@@ -151,12 +137,10 @@ public class TankSuspesnionArm : MonoBehaviour
         Vector3 force = transform.up * totalForceMag;
         m_Rigidbody.AddForceAtPosition(force, hit.point, ForceMode.Force);
 
-        // Wheel visual: keep it resting on ground but never clip
         float wheelOnGround = springLen;
-        // do not go *above* restLength + MaxWheelExtension
-        float clamped = Mathf.Clamp(wheelOnGround,
-                                    m_Config.restLength - m_Config.maxCompression,
-                                    m_Config.restLength + m_MaxWheelExtension);
+        
+        //Clamped to ensure it never over extneds or clipped
+        float clamped = Mathf.Clamp(wheelOnGround, m_Config.restLength - m_Config.maxCompression, m_Config.restLength + m_MaxWheelExtension);
         MoveWheel(clamped);
     }
 
@@ -167,23 +151,15 @@ public class TankSuspesnionArm : MonoBehaviour
             return;
         }
 
-        // local down direction is -Y
+        // The wheel mesh moves down along the arm's local -Y axis
         Vector3 targetLocal = new Vector3(0f, -distanceFromArm, 0f);
+
+        // Lerp for smooth wheel movement (visual only)
         m_WheelPos.localPosition = Vector3.Lerp( m_WheelPos.localPosition, targetLocal, Time.fixedDeltaTime * m_WheelLerpSpeed);
     }
 
 
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
 
-        Gizmos.color = IsGrounded ? Color.green : Color.red;
-        Vector3 end = transform.position - transform.up * m_LastHitDistance;
-        Gizmos.DrawLine(transform.position, end);
-    }
 
     public float DampeningCalculation(Vector3 v1, Vector3 v2)
     {
@@ -195,5 +171,15 @@ public class TankSuspesnionArm : MonoBehaviour
 
 
 }
+//private void OnDrawGizmos()
+//{
+//    if (!Application.isPlaying)
+//    {
+//        return;
+//    }
 
+//    Gizmos.color = IsGrounded ? Color.green : Color.red;
+//    Vector3 end = transform.position - transform.up * m_LastHitDistance;
+//    Gizmos.DrawLine(transform.position, end);
+//}
 

@@ -10,7 +10,7 @@ public class TankConfig : ScriptableObject
     public float maxSpeed = 12f;
 
 
-    // Hookes Law = 
+ 
     [Header("Suspension")]
     // Length of spring when not in use 
     public float restLength = 0.6f;
@@ -22,9 +22,5 @@ public class TankConfig : ScriptableObject
     public float maxCompression  = 0.3f;
 
     public float wheelRadius = 0.18f;  
-
-    //[Header("Rotation")]
-    //public float turretSpeed;
-    //public float hullRotateLag;
 
 }

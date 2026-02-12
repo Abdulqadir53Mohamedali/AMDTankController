@@ -3,41 +3,34 @@ using UnityEngine;
 
 /// <summary>
 /// Represents one track side: collects suspension arms, computes traction,
-/// and exposes drive points for applying engine force.
+/// and exposes drive points for applying engine force
 /// </summary>
 public class TankTrack : MonoBehaviour
 {
     [Header("Drive Points")]
     [SerializeField] private List<Transform> m_DrivePoints = new();
 
+    // Cached arms so we don't repeatedly search the hierarchy every physics tick
     private TankSuspesnionArm[] m_SuspensionArmsGroup;
 
     //0–1 how many arms are supporting the track
-    public float GroundedRatio { get; private set; }
+    public float m_GroundedRatio { get; private set; }
 
     //Average compression across grounded arms (0–1)
-    public float AverageCompression { get; private set; }
+    public float m_AverageCompression { get; private set; }
 
-    //Combined traction factor you can use for scaling forces
-    public float TractionFactor => GroundedRatio * Mathf.Lerp(0.5f, 1f, AverageCompression);
 
+    // Combined traction scalar:
+    // - More grounded arms increases traction.
+    // - More compression increases traction slightly
+    public float TractionFactor => m_GroundedRatio * Mathf.Lerp(0.5f, 1f, m_AverageCompression);
+
+    // Read-only view so other scripts can use drive points but not replace the list at runtime
     public IReadOnlyList<Transform> DrivePoints => m_DrivePoints;
 
     private void Awake()
     {
         m_SuspensionArmsGroup = GetComponentsInChildren<TankSuspesnionArm>();
-
-        //if (m_DrivePoints.Count == 0)
-        //{
-        //    // Auto-pick children named "Wheel" as drive points 
-        //    foreach (Transform t in GetComponentsInChildren<Transform>())
-        //    {
-        //        if (t.name.Contains("DriveWheel"))
-        //        {
-        //            m_DrivePoints.Add(t);
-        //        }
-        //    }
-        //}
     }
 
     private void FixedUpdate()
@@ -47,10 +40,11 @@ public class TankTrack : MonoBehaviour
 
     private void UpdateTraction()
     {
+        // If no arms exist, traction is effectively zero
         if (m_SuspensionArmsGroup == null || m_SuspensionArmsGroup.Length == 0)
         {
-            GroundedRatio = 0f;
-            AverageCompression = 0f;
+            m_GroundedRatio = 0f;
+            m_AverageCompression = 0f;
             return;
         }
 
@@ -66,7 +60,9 @@ public class TankTrack : MonoBehaviour
             }
         }
 
-        GroundedRatio = (float)grounded / m_SuspensionArmsGroup.Length;
-        AverageCompression = grounded > 0 ? compressionSum / grounded : 0f;
+        m_GroundedRatio = (float)grounded / m_SuspensionArmsGroup.Length;
+
+        // Only average compression across grounded arms, airborne arms shouldn’t dilute the value
+        m_AverageCompression = grounded > 0 ? compressionSum / grounded : 0f;
     }
 }
