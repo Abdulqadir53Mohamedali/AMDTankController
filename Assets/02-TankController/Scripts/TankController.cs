@@ -22,9 +22,6 @@ public class TankController : MonoBehaviour
     }
     void Update()
     {
-        m_Movement.SetInput(m_Throttle, m_Steer);
-
-
         if (m_Movement != null)
 		{
             m_Movement.SetInput(m_Throttle, m_Steer);

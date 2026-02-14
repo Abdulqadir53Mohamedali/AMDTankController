@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TankConfigBasic
   m_EditorClassIdentifier: 
   maxTrackForce: 600
-  maxSpeed: 5.32
+  maxSpeed: 4.5
   restLength: 0.2
   springStiffnes: 4000
   damperStrength: 1500
